@@ -256,6 +256,16 @@ bool createStorageDirectories()
 	return true;
 }
 
+extern "C" JNIEXPORT void JNICALL Java_org_love2d_android_GameActivity_setEnv(JNIEnv *env, jobject self, jstring name, jstring value)
+{
+	const char *a = env->GetStringUTFChars(name, nullptr);
+	const char *b = env->GetStringUTFChars(value, nullptr);
+	SDL_Log("setEnv %s %s", a, b);
+	setenv(a, b, 1);
+	env->ReleaseStringUTFChars(name, a);
+	env->ReleaseStringUTFChars(value, b);
+}
+
 } // android
 } // love
 
