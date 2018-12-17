@@ -7,9 +7,17 @@ LOCAL_MODULE    := liblove
 LOCAL_CFLAGS    := -fexceptions -g -Dlinux -Dunix \
 	-DHAVE_GCC_DESTRUCTOR=1 -DOPT_GENERIC -DREAL_IS_FLOAT \
 	-DGL_GLEXT_PROTOTYPES -DLOVE_TURBO_JPEG -DLOVE_NO_DEVIL \
-	-DAL_ALEXT_PROTOTYPES -DLOVE_USE_PHYSFS_2_1
+	-DAL_ALEXT_PROTOTYPES
 
 LOCAL_CPPFLAGS  := ${LOCAL_CFLAGS} 
+
+# I don't think there's armeabi-v7a device without NEON instructions in 2018
+LOCAL_ARM_NEON := true
+
+ifeq ($(TARGET_ARCH_ABI),arm64-v8a)
+	# ARM64 does have socklen_t
+	LOCAL_CFLAGS += -DHAS_SOCKLEN_T=1
+endif
 
 LOCAL_C_INCLUDES  :=  \
 	${LOCAL_PATH}/src \
@@ -19,8 +27,14 @@ LOCAL_C_INCLUDES  :=  \
 	${LOCAL_PATH}/src/libraries/physfs \
 	${LOCAL_PATH}/src/libraries/glslang/glslang/Include \
 	${LOCAL_PATH}/../SDL2-2.0.9/include \
-	${LOCAL_PATH}/../openal-soft-1.19.1/prebuilt/include \
-	${LOCAL_PATH}/../freetype-2.8.1-prebuilt/include \
+	${LOCAL_PATH}/../jasper-1.900.1/src/libjasper/include \
+	${LOCAL_PATH}/../libmng-1.0.10/ \
+	${LOCAL_PATH}/../lcms2-2.5/include \
+	${LOCAL_PATH}/../tiff-3.9.5/libtiff \
+	${LOCAL_PATH}/../openal-soft-1.18.2/include \
+	${LOCAL_PATH}/../openal-soft-1.18.2/OpenAL32/Include \
+	${LOCAL_PATH}/../freetype2-android/include \
+	${LOCAL_PATH}/../freetype2-android/src \
 	${LOCAL_PATH}/../mpg123-1.17.0/src/libmpg123 \
 	${LOCAL_PATH}/../libmodplug-0.8.8.4/src \
 	${LOCAL_PATH}/../libvorbis-1.3.5/include \
@@ -38,6 +52,7 @@ LOCAL_SRC_FILES := \
 	$(wildcard ${LOCAL_PATH}/src/modules/audio/*.cpp) \
  	$(wildcard ${LOCAL_PATH}/src/modules/audio/null/*.cpp) \
  	$(wildcard ${LOCAL_PATH}/src/modules/audio/openal/*.cpp) \
+ 	$(wildcard ${LOCAL_PATH}/src/modules/data/*.cpp) \
 	$(wildcard ${LOCAL_PATH}/src/modules/event/*.cpp) \
  	$(wildcard ${LOCAL_PATH}/src/modules/event/sdl/*.cpp) \
 	$(wildcard ${LOCAL_PATH}/src/modules/filesystem/*.cpp) \
@@ -82,16 +97,24 @@ LOCAL_SRC_FILES := \
   $(wildcard ${LOCAL_PATH}/src/libraries/Box2D/Dynamics/Joints/*.cpp) \
   $(wildcard ${LOCAL_PATH}/src/libraries/Box2D/Rope/*.cpp) \
   $(wildcard ${LOCAL_PATH}/src/libraries/glad/*.cpp) \
+  $(wildcard ${LOCAL_PATH}/src/libraries/glslang/glslang/GenericCodeGen/*.cpp) \
+  $(wildcard ${LOCAL_PATH}/src/libraries/glslang/glslang/MachineIndependent/*.cpp) \
+  $(wildcard ${LOCAL_PATH}/src/libraries/glslang/glslang/MachineIndependent/preprocessor/*.cpp) \
+  $(wildcard ${LOCAL_PATH}/src/libraries/glslang/glslang/OSDependent/Unix/*.cpp) \
+  $(wildcard ${LOCAL_PATH}/src/libraries/glslang/OGLCompilersDLL/*.cpp) \
+  $(wildcard ${LOCAL_PATH}/src/libraries/glslang/glslang//*.cpp) \
   $(wildcard ${LOCAL_PATH}/src/libraries/enet/*.cpp) \
   $(wildcard ${LOCAL_PATH}/src/libraries/enet/libenet/*.c) \
+  $(wildcard ${LOCAL_PATH}/src/libraries/lua53/*.c) \
   $(wildcard ${LOCAL_PATH}/src/libraries/luasocket/*.cpp) \
   $(wildcard ${LOCAL_PATH}/src/libraries/luautf8/*.c) \
   $(wildcard ${LOCAL_PATH}/src/libraries/luasocket/libluasocket/*.c) \
-  $(wildcard ${LOCAL_PATH}/src/libraries/noise1234/*.cpp) \
-  $(wildcard ${LOCAL_PATH}/src/libraries/physfs/*.c) \
-  $(wildcard ${LOCAL_PATH}/src/libraries/Wuff/*.c) \
   $(wildcard ${LOCAL_PATH}/src/libraries/lodepng/*.cpp) \
   $(wildcard ${LOCAL_PATH}/src/libraries/lz4/*.c) \
+  $(wildcard ${LOCAL_PATH}/src/libraries/noise1234/*.cpp) \
+  $(wildcard ${LOCAL_PATH}/src/libraries/physfs/*.c) \
+	$(wildcard ${LOCAL_PATH}/src/libraries/Wuff/*.c) \
+  $(wildcard ${LOCAL_PATH}/src/libraries/xxHash/*.c) \
   ))
 
 LOCAL_CXXFLAGS := -std=c++0x

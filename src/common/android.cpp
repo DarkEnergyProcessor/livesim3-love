@@ -1,5 +1,5 @@
 /**
- * Copyright (c) 2006-2016 LOVE Development Team
+ * Copyright (c) 2006-2018 LOVE Development Team
  *
  * This software is provided 'as-is', without any express or implied
  * warranty.  In no event will the authors be held liable for any damages
@@ -67,37 +67,6 @@ bool getImmersive()
 	return immersive_active;
 }
 
-const char *getCurrentAPKPath()
-{
-	static char *path = NULL;
-
-	if (path)
-	{
-		delete[] path;
-		path = NULL;
-	}
-
-	JNIEnv *env = (JNIEnv*) SDL_AndroidGetJNIEnv();
-	jobject activity = (jobject) SDL_AndroidGetActivity();
-	jclass clazz(env->GetObjectClass(activity));
-	jmethodID methodID = env->GetMethodID(clazz, "getPackageCodePath", "()Ljava/lang/String;");
-	jobject result = env->CallObjectMethod(activity, methodID);
-
-	jboolean isCopy;
-	const char *res = env->GetStringUTFChars((jstring)result, &isCopy);
-	size_t length = strlen(res) + 1;
-
-	path = new char[length];
-	memcpy(path, res, length);
-
-	env->ReleaseStringUTFChars((jstring)result, res);
-	env->DeleteLocalRef(result);
-	env->DeleteLocalRef(activity);
-	env->DeleteLocalRef(clazz);
-
-	return path;
-}
-
 double getScreenScale()
 {
 	static double result = -1.;
@@ -154,14 +123,14 @@ bool openURL(const std::string &url)
 	JNIEnv *env = (JNIEnv*) SDL_AndroidGetJNIEnv();
 	jclass activity = env->FindClass("org/love2d/android/GameActivity");
 
-	jmethodID openURL= env->GetStaticMethodID(activity, "openURL", "(Ljava/lang/String;)V");
+	jmethodID openURL = env->GetStaticMethodID(activity, "openURL", "(Ljava/lang/String;)Z");
 	jstring url_jstring = (jstring) env->NewStringUTF(url.c_str());
 
-	env->CallStaticVoidMethod(activity, openURL, url_jstring);
+	jboolean result = env->CallStaticBooleanMethod(activity, openURL, url_jstring);
 
 	env->DeleteLocalRef(url_jstring);
 	env->DeleteLocalRef(activity);
-	return true;
+	return result;
 }
 
 void vibrate(double seconds)
@@ -256,14 +225,20 @@ bool createStorageDirectories()
 	return true;
 }
 
-extern "C" JNIEXPORT void JNICALL Java_org_love2d_android_GameActivity_setEnv(JNIEnv *env, jobject self, jstring name, jstring value)
+bool hasBackgroundMusic()
 {
-	const char *a = env->GetStringUTFChars(name, nullptr);
-	const char *b = env->GetStringUTFChars(value, nullptr);
-	SDL_Log("setEnv %s %s", a, b);
-	setenv(a, b, 1);
-	env->ReleaseStringUTFChars(name, a);
-	env->ReleaseStringUTFChars(value, b);
+	JNIEnv *env = (JNIEnv*) SDL_AndroidGetJNIEnv();
+	jobject activity = (jobject) SDL_AndroidGetActivity();
+
+	jclass clazz(env->GetObjectClass(activity));
+	jmethodID method_id = env->GetMethodID(clazz, "hasBackgroundMusic", "()Z");
+
+	jboolean result = env->CallBooleanMethod(activity, method_id);
+
+	env->DeleteLocalRef(activity);
+	env->DeleteLocalRef(clazz);
+
+	return result;
 }
 
 } // android
