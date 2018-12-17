@@ -38,6 +38,8 @@ namespace android
 void setImmersive(bool immersive_active);
 bool getImmersive();
 
+const char *getCurrentAPKPath();
+
 /**
  * Gets the scale factor of the window's screen, e.g. on Retina displays this
  * will return 2.0.

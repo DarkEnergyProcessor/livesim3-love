@@ -67,6 +67,37 @@ bool getImmersive()
 	return immersive_active;
 }
 
+const char *getCurrentAPKPath()
+{
+	static char *path = NULL;
+
+	if (path)
+	{
+		delete[] path;
+		path = NULL;
+	}
+
+	JNIEnv *env = (JNIEnv*) SDL_AndroidGetJNIEnv();
+	jobject activity = (jobject) SDL_AndroidGetActivity();
+	jclass clazz(env->GetObjectClass(activity));
+	jmethodID methodID = env->GetMethodID(clazz, "getPackageCodePath", "()Ljava/lang/String;");
+	jobject result = env->CallObjectMethod(activity, methodID);
+
+	jboolean isCopy;
+	const char *res = env->GetStringUTFChars((jstring)result, &isCopy);
+	size_t length = strlen(res) + 1;
+
+	path = new char[length];
+	memcpy(path, res, length);
+
+	env->ReleaseStringUTFChars((jstring)result, res);
+	env->DeleteLocalRef(result);
+	env->DeleteLocalRef(activity);
+	env->DeleteLocalRef(clazz);
+
+	return path;
+}
+
 double getScreenScale()
 {
 	static double result = -1.;
