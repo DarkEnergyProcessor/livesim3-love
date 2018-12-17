@@ -27,13 +27,8 @@ LOCAL_C_INCLUDES  :=  \
 	${LOCAL_PATH}/src/libraries/physfs \
 	${LOCAL_PATH}/src/libraries/glslang/glslang/Include \
 	${LOCAL_PATH}/../SDL2-2.0.9/include \
-	${LOCAL_PATH}/../jasper-1.900.1/src/libjasper/include \
-	${LOCAL_PATH}/../libmng-1.0.10/ \
-	${LOCAL_PATH}/../lcms2-2.5/include \
-	${LOCAL_PATH}/../tiff-3.9.5/libtiff \
 	${LOCAL_PATH}/../openal-soft-1.16.0/prebuilt/include \
-	${LOCAL_PATH}/../freetype2-android/include \
-	${LOCAL_PATH}/../freetype2-android/src \
+	${LOCAL_PATH}/../freetype-2.8.1-prebuilt/include \
 	${LOCAL_PATH}/../mpg123-1.17.0/src/libmpg123 \
 	${LOCAL_PATH}/../libmodplug-0.8.8.4/src \
 	${LOCAL_PATH}/../libvorbis-1.3.5/include \
