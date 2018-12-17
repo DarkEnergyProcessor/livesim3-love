@@ -234,33 +234,35 @@ bool Filesystem::setSource(const char *source)
 				new_search_path.c_str());
 		char* game_archive_ptr = NULL;
 		size_t game_archive_size = 0;
+		bool direct_mount = false;
 		if (!love::android::loadGameArchiveToMemory(
 					new_search_path.c_str(), &game_archive_ptr,
 					&game_archive_size))
 		{
 			SDL_Log("Failure memory loading archive %s", new_search_path.c_str());
-			return false;
+			const char *currentAPK = love::android::getCurrentAPKPath();
+			if (!PHYSFS_mount(currentAPK, nullptr, 1))
+			{
+				SDL_Log("Failure mounting current APK.");
+				return false;
+			}
+			// Check if either conf.lua or main.lua exist
+			PHYSFS_Stat confStat;
+			if (!PHYSFS_stat("conf.lua", &confStat) && !PHYSFS_stat("main.lua", &confStat))
+			{
+				SDL_Log("conf.lua or main.lua not found inside APK.");
+				PHYSFS_unmount(currentAPK);
+				return false;
+			}
+			direct_mount = true;
 		}
-		if (!PHYSFS_mountMemory(
+
+		if (!direct_mount && !PHYSFS_mountMemory(
 			    game_archive_ptr, game_archive_size,
 			    love::android::freeGameArchiveMemory, "archive.zip", "/", 0))
 		{
 			SDL_Log("Failure mounting in-memory archive.");
 			love::android::freeGameArchiveMemory(game_archive_ptr);
-			return false;
-		}
-		const char *currentAPK = love::android::getCurrentAPKPath();
-		if (!PHYSFS_mount(currentAPK, nullptr, 1))
-		{
-			SDL_Log("Failure mounting current APK.");
-			return false;
-		}
-		// Check if either conf.lua or main.lua exist
-		PHYSFS_Stat confStat;
-		if (!PHYSFS_stat("conf.lua", &confStat) && !PHYSFS_stat("main.lua", &confStat))
-		{
-			SDL_Log("conf.lua or main.lua not found inside APK.");
-			PHYSFS_unmount(currentAPK);
 			return false;
 		}
 	}
