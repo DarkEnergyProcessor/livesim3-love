@@ -1686,6 +1686,33 @@ set(LOVE_3P
 
 love_disable_warnings(love_3p_box2d love_3p_enet love_3p_luasocket love_3p_physfs)
 
+# User-defined source files
+if(WIN32)
+	set(LS2X_DYNWRAP src/ls2x/src/dynwrap/dynwrap_win.cpp)
+else()
+	set(LS2X_DYNWRAP src/ls2x/src/dynwrap/dynwrap_unix.cpp)
+endif()
+set(LS2X_SOURCE_FILES
+	src/ls2x/src/main.cpp
+	src/ls2x/src/audiomix.cpp
+	src/ls2x/src/fft.cpp
+	src/ls2x/src/libav.cpp
+	src/ls2x/src/kissfft/kiss_fft.c
+	${LS2X_DYNWRAP}
+	src/ls2x/src/lvep/FFMpegStream.cpp
+	src/ls2x/src/lvep/LFSIOContext.cpp
+	src/ls2x/src/lvep/lvep.cpp
+	src/ls2x/src/lvep/LVEPDecoder.cpp
+	src/ls2x/src/lvep/LVEPVideoStream.cpp
+)
+source_group("ls2x" FILES ${LS2X_SOURCE_FILES})
+set(LOVE_SRC_EXTERNAL ${LS2X_SOURCE_FILES})
+set(LOVE_INCLUDE_DIRS
+	${LOVE_INCLUDE_DIRS}
+	src/ls2x/include
+)
+add_definitions(-DLS2X_USE_LIBAV -DLS2X_USE_KISSFFT -DLS2X_EMBEDDED_IN_LOVE -Dkiss_fft_scalar=double)
+
 #
 # liblove
 #
@@ -1712,6 +1739,8 @@ set(LOVE_LIB_SRC
 	${LOVE_SRC_MODULE_TOUCH}
 	${LOVE_SRC_MODULE_VIDEO}
 	${LOVE_SRC_MODULE_WINDOW}
+	# User-defined
+	${LOVE_SRC_EXTERNAL}
 )
 
 include_directories(

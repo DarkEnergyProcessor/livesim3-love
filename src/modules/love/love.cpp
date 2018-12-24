@@ -135,6 +135,9 @@ extern "C"
 #if defined(LOVE_ENABLE_WINDOW)
 	extern int luaopen_love_window(lua_State*);
 #endif
+#if defined(LS2X_EMBEDDED_IN_LOVE)
+	extern int luaopen_ls2xlib(lua_State *L);
+#endif
 	extern int luaopen_love_nogame(lua_State*);
 	extern int luaopen_love_boot(lua_State*);
 }
@@ -196,6 +199,9 @@ static const luaL_Reg modules[] = {
 #endif
 #if defined(LOVE_ENABLE_WINDOW)
 	{ "love.window", luaopen_love_window },
+#endif
+#if defined(LS2X_EMBEDDED_IN_LOVE)
+	{ "ls2xlib", luaopen_ls2xlib },
 #endif
 	{ "love.nogame", luaopen_love_nogame },
 	{ "love.boot", luaopen_love_boot },

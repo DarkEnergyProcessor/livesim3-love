@@ -7,7 +7,7 @@ LOCAL_MODULE    := liblove
 LOCAL_CFLAGS    := -fexceptions -g -Dlinux -Dunix \
 	-DHAVE_GCC_DESTRUCTOR=1 -DOPT_GENERIC -DREAL_IS_FLOAT \
 	-DGL_GLEXT_PROTOTYPES -DLOVE_TURBO_JPEG -DLOVE_NO_DEVIL \
-	-DAL_ALEXT_PROTOTYPES
+	-DAL_ALEXT_PROTOTYPES -DLS2X_USE_KISSFFT -Dkiss_fft_scalar=double
 
 LOCAL_CPPFLAGS  := ${LOCAL_CFLAGS} 
 
@@ -21,6 +21,7 @@ endif
 
 LOCAL_C_INCLUDES  :=  \
 	${LOCAL_PATH}/src \
+	${LOCAL_PATH}/src/ls2x/include \
 	${LOCAL_PATH}/src/modules \
 	${LOCAL_PATH}/src/libraries/ \
 	${LOCAL_PATH}/src/libraries/enet/libenet/include \
@@ -111,6 +112,7 @@ LOCAL_SRC_FILES := \
   $(wildcard ${LOCAL_PATH}/src/libraries/xxHash/*.c) \
   ))
 
+LOCAL_SRC_FILES += src/ls2x/src/main.cpp src/ls2x/src/audiomix.cpp src/ls2x/src/fft.cpp src/ls2x/src/kissfft/kiss_fft.c
 LOCAL_CXXFLAGS := -std=c++0x
 
 LOCAL_SHARED_LIBRARIES := libopenal libmpg123 
