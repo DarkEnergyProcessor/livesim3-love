@@ -123,11 +123,11 @@ void endSession()
 const std::map<std::string, void*> &getFunctions()
 {
 	static std::map<std::string, void*> func = {
-		{"resample", &resample},
-		{"startAudioMixSession", &startSession},
-		{"mixSample", &mixSample},
-		{"getAudioMixPointer", &getSamplePointer},
-		{"endAudioMixSession", &endSession}
+		{std::string("resample"), (void*) &resample},
+		{std::string("startAudioMixSession"), (void*) &startSession},
+		{std::string("mixSample"), (void*) &mixSample},
+		{std::string("getAudioMixPointer"), (void*) &getSamplePointer},
+		{std::string("endAudioMixSession"), (void*) &endSession}
 	};
 
 	return func;

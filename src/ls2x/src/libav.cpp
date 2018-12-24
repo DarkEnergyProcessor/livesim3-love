@@ -713,12 +713,12 @@ libavFunctions *getFunctionPointer()
 const std::map<std::string, void*> &getFunctions()
 {
 	static std::map<std::string, void*> funcs = {
-		{"encodingSupported", hasEncodingSupported},
-		{"startEncodingSession", startSession},
-		{"supplyEncoder", supply},
-		{"endEncodingSession", endSession},
-		{"loadAudioFile", loadAudioFile},
-		{"av_free", avF.free},
+		{std::string("encodingSupported"), (void*) hasEncodingSupported},
+		{std::string("startEncodingSession"), (void*) startSession},
+		{std::string("supplyEncoder"), (void*) supply},
+		{std::string("endEncodingSession"), (void*) endSession},
+		{std::string("loadAudioFile"), (void*) loadAudioFile},
+		{std::string("av_free"), (void*) avF.free},
 	};
 	return funcs;
 }

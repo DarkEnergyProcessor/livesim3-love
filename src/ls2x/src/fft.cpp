@@ -17,11 +17,13 @@ kiss_fft_cfg getCfg(size_t sampleSize)
 	static size_t prevSmpSize = 0;
 
 	if (cfg)
+	{
 		if (prevSmpSize != sampleSize)
 		{
 			kiss_fft_free(cfg);
 			cfg = kiss_fft_alloc(prevSmpSize = sampleSize, false, nullptr, nullptr);
 		}
+	}
 	else
 		cfg = kiss_fft_alloc(prevSmpSize = sampleSize, false, nullptr, nullptr);
 
@@ -122,9 +124,9 @@ const char *scalarType()
 const std::map<std::string, void*> &getFunctions()
 {
 	static std::map<std::string, void*> funcs = {
-		{"fftr1", (void(*)(const short *, kiss_fft_scalar *, kiss_fft_scalar *, size_t))fftr},
-		{"fftr2", (void(*)(const short *, kiss_fft_scalar *, size_t, bool))fftr},
-		{"scalarType", scalarType}
+		{std::string("fftr1"), (void*)(void(*)(const short *, kiss_fft_scalar *, kiss_fft_scalar *, size_t)) &fftr},
+		{std::string("fftr2"), (void*)(void(*)(const short *, kiss_fft_scalar *, size_t, bool)) &fftr},
+		{std::string("scalarType"), (void*) &scalarType}
 	};
 	return funcs;
 }

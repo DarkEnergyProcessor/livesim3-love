@@ -113,7 +113,7 @@ LOCAL_SRC_FILES := \
   ))
 
 LOCAL_SRC_FILES += src/ls2x/src/main.cpp src/ls2x/src/audiomix.cpp src/ls2x/src/fft.cpp src/ls2x/src/kissfft/kiss_fft.c
-LOCAL_CXXFLAGS := -std=c++0x
+LOCAL_CXXFLAGS := -std=c++11
 
 LOCAL_SHARED_LIBRARIES := libopenal libmpg123 
 
