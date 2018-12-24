@@ -215,6 +215,25 @@ int w_getMode(lua_State *L)
 	return 3;
 }
 
+int w_getDisplayOrientation(lua_State *L)
+{
+	int displayindex = 0;
+	if (!lua_isnoneornil(L, 1))
+		displayindex = (int) luaL_checkinteger(L, 1) - 1;
+	else
+	{
+		int x, y;
+		instance()->getPosition(x, y, displayindex);
+	}
+
+	const char *orientationstr = nullptr;
+	if (!Window::getConstant(instance()->getDisplayOrientation(displayindex), orientationstr))
+		return luaL_error(L, "Unknown display orientation type.");
+
+	lua_pushstring(L, orientationstr);
+	return 1;
+}
+
 int w_getFullscreenModes(lua_State *L)
 {
 	int displayindex = 0;
@@ -359,6 +378,23 @@ int w_getIcon(lua_State *L)
 {
 	image::ImageData *i = instance()->getIcon();
 	luax_pushtype(L, i);
+	return 1;
+}
+
+int w_setVSync(lua_State *L)
+{
+	int vsync = 0;
+	if (lua_type(L, 1) == LUA_TBOOLEAN)
+		vsync = lua_toboolean(L, 1);
+	else
+		vsync = (int)luaL_checkinteger(L, 1);
+	instance()->setVSync(vsync);
+	return 0;
+}
+
+int w_getVSync(lua_State *L)
+{
+	lua_pushinteger(L, instance()->getVSync());
 	return 1;
 }
 
@@ -562,6 +598,7 @@ static const luaL_Reg functions[] =
 	{ "setMode", w_setMode },
 	{ "updateMode", w_updateMode },
 	{ "getMode", w_getMode },
+	{ "getDisplayOrientation", w_getDisplayOrientation },
 	{ "getFullscreenModes", w_getFullscreenModes },
 	{ "setFullscreen", w_setFullscreen },
 	{ "getFullscreen", w_getFullscreen },
@@ -572,6 +609,8 @@ static const luaL_Reg functions[] =
 	{ "getPosition", w_getPosition },
 	{ "setIcon", w_setIcon },
 	{ "getIcon", w_getIcon },
+	{ "setVSync", w_setVSync },
+	{ "getVSync", w_getVSync },
 	{ "setDisplaySleepEnabled", w_setDisplaySleepEnabled },
 	{ "isDisplaySleepEnabled", w_isDisplaySleepEnabled },
 	{ "setTitle", w_setTitle },

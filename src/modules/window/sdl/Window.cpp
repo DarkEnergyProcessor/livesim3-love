@@ -512,12 +512,7 @@ bool Window::setWindow(int width, int height, WindowSettings *settings)
 
 	SDL_RaiseWindow(window);
 
-	SDL_GL_SetSwapInterval(f.vsync);
-
-	// Check if adaptive vsync was requested but not supported, and fall back
-	// to regular vsync if so.
-	if (f.vsync == -1 && SDL_GL_GetSwapInterval() != -1)
-		SDL_GL_SetSwapInterval(1);
+	setVSync(f.vsync);
 
 	updateSettings(f, false);
 
@@ -608,7 +603,7 @@ void Window::updateSettings(const WindowSettings &newsettings, bool updateGraphi
 	SDL_GL_GetAttribute(SDL_GL_MULTISAMPLESAMPLES, &samples);
 
 	settings.msaa = (buffers > 0 ? samples : 0);
-	settings.vsync = SDL_GL_GetSwapInterval();
+	settings.vsync = getVSync();
 
 	settings.stencil = newsettings.stencil;
 	settings.depth = newsettings.depth;
@@ -741,6 +736,26 @@ const char *Window::getDisplayName(int displayindex) const
 		throw love::Exception("Invalid display index: %d", displayindex + 1);
 
 	return name;
+}
+
+Window::DisplayOrientation Window::getDisplayOrientation(int displayindex) const
+{
+	// TODO: We can expose this everywhere, we just need to watch out for the
+	// SDL binary being older than the headers on Linux.
+#if SDL_VERSION_ATLEAST(2, 0, 9) && (defined(LOVE_ANDROID) || !defined(LOVE_LINUX))
+	switch (SDL_GetDisplayOrientation(displayindex))
+	{
+		case SDL_ORIENTATION_UNKNOWN: return ORIENTATION_UNKNOWN;
+		case SDL_ORIENTATION_LANDSCAPE: return ORIENTATION_LANDSCAPE;
+		case SDL_ORIENTATION_LANDSCAPE_FLIPPED: return ORIENTATION_LANDSCAPE_FLIPPED;
+		case SDL_ORIENTATION_PORTRAIT: return ORIENTATION_PORTRAIT;
+		case SDL_ORIENTATION_PORTRAIT_FLIPPED: return ORIENTATION_PORTRAIT_FLIPPED;
+	}
+#else
+	LOVE_UNUSED(displayindex);
+#endif
+
+	return ORIENTATION_UNKNOWN;
 }
 
 std::vector<Window::WindowSize> Window::getFullscreenSizes(int displayindex) const
@@ -893,6 +908,24 @@ bool Window::setIcon(love::image::ImageData *imgd)
 love::image::ImageData *Window::getIcon()
 {
 	return icon.get();
+}
+
+void Window::setVSync(int vsync)
+{
+	if (context == nullptr)
+		return;
+
+	SDL_GL_SetSwapInterval(vsync);
+
+	// Check if adaptive vsync was requested but not supported, and fall back
+	// to regular vsync if so.
+	if (vsync == -1 && SDL_GL_GetSwapInterval() != -1)
+		SDL_GL_SetSwapInterval(1);
+}
+
+int Window::getVSync() const
+{
+	return context != nullptr ? SDL_GL_GetSwapInterval() : 0;
 }
 
 void Window::setDisplaySleepEnabled(bool enable)

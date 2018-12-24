@@ -57,6 +57,8 @@ public:
 
 	const char *getDisplayName(int displayindex) const override;
 
+	DisplayOrientation getDisplayOrientation(int displayindex) const override;
+
 	std::vector<WindowSize> getFullscreenSizes(int displayindex) const override;
 
 	void getDesktopDimensions(int displayindex, int &width, int &height) const override;
@@ -71,6 +73,9 @@ public:
 
 	bool setIcon(love::image::ImageData *imgd) override;
 	love::image::ImageData *getIcon() override;
+
+	void setVSync(int vsync) override;
+	int getVSync() const override;
 
 	void setDisplaySleepEnabled(bool enable) override;
 	bool isDisplaySleepEnabled() const override;
