@@ -289,7 +289,7 @@ std::string getLoveInResources(bool &fused)
 
 std::string getAppdataDirectory()
 {
-	NSSearchPathDirectory searchdir = NSApplicationSupportDirectory;
+	NSSearchPathDirectory searchdir = NSDocumentDirectory;
 	std::string path;
 
 	@autoreleasepool
