@@ -27,15 +27,15 @@ LOCAL_C_INCLUDES  :=  \
 	${LOCAL_PATH}/src/libraries/enet/libenet/include \
 	${LOCAL_PATH}/src/libraries/physfs \
 	${LOCAL_PATH}/src/libraries/glslang/glslang/Include \
-	${LOCAL_PATH}/../SDL2-2.0.9/include \
-	${LOCAL_PATH}/../openal-soft-1.16.0/prebuilt/include \
-	${LOCAL_PATH}/../freetype-2.8.1-prebuilt/include \
-	${LOCAL_PATH}/../mpg123-1.17.0/src/libmpg123 \
-	${LOCAL_PATH}/../libmodplug-0.8.8.4/src \
-	${LOCAL_PATH}/../libvorbis-1.3.5/include \
-	${LOCAL_PATH}/../LuaJIT-2.1/src \
-	${LOCAL_PATH}/../libogg-1.3.2/include \
-	${LOCAL_PATH}/../libtheora-1.2.0alpha1/include 
+	${LOCAL_PATH}/${SDL_PATH}/include \
+	${LOCAL_PATH}/${OPENAL_INCLUDE_PATH} \
+	${LOCAL_PATH}/${FT2_INCLUDE_PATH} \
+	${LOCAL_PATH}/${MPG123_INCLUDE_PATH} \
+	${LOCAL_PATH}/${MODPLUG_INCLUDE_PATH} \
+	${LOCAL_PATH}/${VORBIS_INCLUDE_PATH} \
+	${LOCAL_PATH}/${LUA_INCLUDE_PATH} \
+	${LOCAL_PATH}/${OGG_INCLUDE_PATH} \
+	${LOCAL_PATH}/${THEORA_INCLUDE_PATH}
 		
 LOCAL_SRC_FILES := \
 	$(filter-out \
@@ -122,7 +122,6 @@ LOCAL_STATIC_LIBRARIES := libvorbis libogg libtheora libmodplug libfreetype libl
 # $(info liblove: include dirs $(LOCAL_C_INCLUDES))
 # $(info liblove: src files $(LOCAL_SRC_FILES))
 
-SDL_PATH := ../SDL2-2.0.9
 LOCAL_SRC_FILES += $(SDL_PATH)/src/main/android/SDL_android_main.c 
 LOCAL_LDLIBS := -lz -lGLESv1_CM -lGLESv2 -ldl -landroid
 LOCAL_LDFLAGS := -Wl,--allow-multiple-definition
