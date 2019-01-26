@@ -1,5 +1,5 @@
 /**
- * Copyright (c) 2006-2018 LOVE Development Team
+ * Copyright (c) 2006-2019 LOVE Development Team
  *
  * This software is provided 'as-is', without any express or implied
  * warranty.  In no event will the authors be held liable for any damages
@@ -1398,9 +1398,9 @@ bool Graphics::isCanvasFormatSupported(PixelFormat format, bool readable) const
 	return Canvas::isFormatSupported(format, readable);
 }
 
-bool Graphics::isImageFormatSupported(PixelFormat format) const
+bool Graphics::isImageFormatSupported(PixelFormat format, bool sRGB) const
 {
-	return Image::isFormatSupported(format);
+	return Image::isFormatSupported(format, sRGB);
 }
 
 Shader::Language Graphics::getShaderLanguageTarget() const

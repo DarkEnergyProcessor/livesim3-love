@@ -1,5 +1,5 @@
 /**
- * Copyright (c) 2006-2018 LOVE Development Team
+ * Copyright (c) 2006-2019 LOVE Development Team
  *
  * This software is provided 'as-is', without any express or implied
  * warranty.  In no event will the authors be held liable for any damages
@@ -43,8 +43,6 @@ Image::Image(const Slices &data, const Settings &settings, bool validatedata)
 {
 	if (validatedata && data.validate() == MIPMAPS_DATA)
 		mipmapsType = MIPMAPS_DATA;
-
-	++imageCount;
 }
 
 Image::Image(TextureType textype, PixelFormat format, int width, int height, int slices, const Settings &settings)
@@ -80,6 +78,19 @@ Image::~Image()
 
 void Image::init(PixelFormat fmt, int w, int h, const Settings &settings)
 {
+	Graphics *gfx = Module::getInstance<Graphics>(Module::M_GRAPHICS);
+	if (gfx != nullptr && !gfx->isImageFormatSupported(fmt, sRGB))
+	{
+		const char *str;
+		if (love::getConstant(fmt, str))
+		{
+			throw love::Exception("Cannot create image: "
+								  "%s%s images are not supported on this system.", sRGB ? "sRGB " : "", str);
+		}
+		else
+			throw love::Exception("cannot create image: format is not supported on this system.");
+	}
+
 	pixelWidth = w;
 	pixelHeight = h;
 
@@ -97,6 +108,8 @@ void Image::init(PixelFormat fmt, int w, int h, const Settings &settings)
 		filter.mipmap = defaultMipmapFilter;
 
 	initQuad();
+
+	++imageCount;
 }
 
 void Image::uploadImageData(love::image::ImageDataBase *d, int level, int slice, int x, int y)

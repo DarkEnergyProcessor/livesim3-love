@@ -1,5 +1,5 @@
 /**
- * Copyright (c) 2006-2018 LOVE Development Team
+ * Copyright (c) 2006-2019 LOVE Development Team
  *
  * This software is provided 'as-is', without any express or implied
  * warranty.  In no event will the authors be held liable for any damages
@@ -106,7 +106,7 @@ public:
 
 	bool isCanvasFormatSupported(PixelFormat format) const override;
 	bool isCanvasFormatSupported(PixelFormat format, bool readable) const override;
-	bool isImageFormatSupported(PixelFormat format) const override;
+	bool isImageFormatSupported(PixelFormat format, bool sRGB) const override;
 	Renderer getRenderer() const override;
 	RendererInfo getRendererInfo() const override;
 

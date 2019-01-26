@@ -1,5 +1,5 @@
 /**
- * Copyright (c) 2006-2018 LOVE Development Team
+ * Copyright (c) 2006-2019 LOVE Development Team
  *
  * This software is provided 'as-is', without any express or implied
  * warranty.  In no event will the authors be held liable for any damages
@@ -829,7 +829,7 @@ public:
 	 **/
 	virtual bool isCanvasFormatSupported(PixelFormat format) const = 0;
 	virtual bool isCanvasFormatSupported(PixelFormat format, bool readable) const = 0;
-	virtual bool isImageFormatSupported(PixelFormat format) const = 0;
+	virtual bool isImageFormatSupported(PixelFormat format, bool sRGB = false) const = 0;
 
 	/**
 	 * Gets the renderer used by love.graphics.

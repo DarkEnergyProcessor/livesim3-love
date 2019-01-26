@@ -1,5 +1,5 @@
 /**
-* Copyright (c) 2006-2018 LOVE Development Team
+* Copyright (c) 2006-2019 LOVE Development Team
 *
 * This software is provided 'as-is', without any express or implied
 * warranty.  In no event will the authors be held liable for any damages
@@ -152,12 +152,14 @@ void Font::createTexture()
 	image = gfx->newImage(TEXTURE_2D, pixelFormat, size.width, size.height, 1, settings);
 	image->setFilter(filter);
 
-	// Initialize the texture with transparent black.
-	size_t bpp = getPixelFormatSize(pixelFormat);
-	std::vector<uint8> emptydata(size.width * size.height * bpp, 0);
+	{
+		// Initialize the texture with transparent black.
+		size_t bpp = getPixelFormatSize(pixelFormat);
+		std::vector<uint8> emptydata(size.width * size.height * bpp, 0);
 
-	Rect rect = {0, 0, size.width, size.height};
-	image->replacePixels(emptydata.data(), emptydata.size(), 0, 0, rect, false);
+		Rect rect = {0, 0, size.width, size.height};
+		image->replacePixels(emptydata.data(), emptydata.size(), 0, 0, rect, false);
+	}
 
 	images.emplace_back(image, Acquire::NORETAIN);
 

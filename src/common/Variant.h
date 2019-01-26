@@ -1,5 +1,5 @@
 /**
- * Copyright (c) 2006-2018 LOVE Development Team
+ * Copyright (c) 2006-2019 LOVE Development Team
  *
  * This software is provided 'as-is', without any express or implied
  * warranty.  In no event will the authors be held liable for any damages
@@ -56,7 +56,7 @@ public:
 	public:
 
 		SharedString(const char *string, size_t len)
-		: len(len)
+			: len(len)
 		{
 			str = new char[len+1];
 			memcpy(str, string, len);
@@ -72,7 +72,7 @@ public:
 	public:
 
 		SharedTable(std::vector<std::pair<Variant, Variant>> *table)
-		: table(table)
+			: table(table)
 		{
 		}
 

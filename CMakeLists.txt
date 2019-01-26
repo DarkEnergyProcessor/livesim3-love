@@ -1,5 +1,5 @@
 #
-# Copyright (c) 2006-2018 LOVE Development Team
+# Copyright (c) 2006-2019 LOVE Development Team
 #
 # This software is provided 'as-is', without any express or implied
 # warranty.  In no event will the authors be held liable for any damages
@@ -285,8 +285,6 @@ set(LOVE_SRC_COMMON
 	src/common/math.h
 	src/common/Matrix.cpp
 	src/common/Matrix.h
-	src/common/Memoizer.cpp
-	src/common/Memoizer.h
 	src/common/memory.cpp
 	src/common/memory.h
 	src/common/Module.cpp

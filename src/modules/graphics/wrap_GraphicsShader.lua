@@ -3,7 +3,7 @@ R"luastring"--(
 -- There is a matching delimiter at the bottom of the file.
 
 --[[
-Copyright (c) 2006-2018 LOVE Development Team
+Copyright (c) 2006-2019 LOVE Development Team
 
 This software is provided 'as-is', without any express or implied
 warranty.  In no event will the authors be held liable for any damages
@@ -138,13 +138,13 @@ GLSL.FUNCTIONS = [[
 #endif
 
 float gammaToLinearPrecise(float c) {
-	return c <= 0.04045 ? c * 0.077399380804954 : pow((c + 0.055) * 0.9478672985782, 2.4);
+	return c <= 0.04045 ? c / 12.92 : pow((c + 0.055) / 1.055, 2.4);
 }
 vec3 gammaToLinearPrecise(vec3 c) {
 	bvec3 leq = lessThanEqual(c, vec3(0.04045));
-	c.r = leq.r ? c.r * 0.077399380804954 : pow((c.r + 0.055) * 0.9478672985782, 2.4);
-	c.g = leq.g ? c.g * 0.077399380804954 : pow((c.g + 0.055) * 0.9478672985782, 2.4);
-	c.b = leq.b ? c.b * 0.077399380804954 : pow((c.b + 0.055) * 0.9478672985782, 2.4);
+	c.r = leq.r ? c.r / 12.92 : pow((c.r + 0.055) / 1.055, 2.4);
+	c.g = leq.g ? c.g / 12.92 : pow((c.g + 0.055) / 1.055, 2.4);
+	c.b = leq.b ? c.b / 12.92 : pow((c.b + 0.055) / 1.055, 2.4);
 	return c;
 }
 vec4 gammaToLinearPrecise(vec4 c) { return vec4(gammaToLinearPrecise(c.rgb), c.a); }
