@@ -5,6 +5,7 @@
 #include "audiomix.h"
 
 #include <cmath>
+#include <cstring>
 
 #include <new>
 
