@@ -1,0 +1,25 @@
+language: c++
+dist: xenial
+
+compiler:
+  - gcc
+  - clang
+
+addons:
+  apt:
+    update: true
+    packages:
+    - cmake
+    - libluajit-5.1-dev
+    - libfreetype6-dev
+    - libsdl2-dev
+    - libopenal-dev
+    - libmodplug-dev
+    - libmpg123-dev
+    - libogg-dev
+    - libvorbis-dev
+    - libtheora-dev
+
+script:
+  - cmake -Bbuild -H.
+  - cmake --build build --config Release
