@@ -1,4 +1,4 @@
-This is modified LOVE 11.x used by Live Simulator: 2 v3.0.
+This is modified LOVE 11.x used by [Live Simulator: 2 v3.0](https://github.com/MikuAuahDark/livesim2/tree/v3.0.5) and later.
 
 [![Build Status](https://travis-ci.com/MikuAuahDark/livesim3-love.svg?branch=master)](https://travis-ci.com/MikuAuahDark/livesim3-love)
 
