@@ -6,6 +6,8 @@
 
 #include "fft.h"
 
+#include <cmath>
+
 namespace ls2x
 {
 namespace fft
@@ -52,8 +54,8 @@ void fftr(const short *input, kiss_fft_scalar *out_l, kiss_fft_scalar *out_r, si
 	{
 		kiss_fft_cpx &l = (ptrdata + sampleSize * 2)[i];
 		kiss_fft_cpx &r = (ptrdata + sampleSize * 3)[i];
-		out_l[i] = abs(l.i * l.i + l.r + l.r);
-		out_r[i] = abs(r.i * r.i + r.r * r.r);
+		out_l[i] = std::abs(l.i * l.i + l.r + l.r);
+		out_r[i] = std::abs(r.i * r.i + r.r * r.r);
 	}
 
 	delete[] ptrdata;
@@ -83,7 +85,7 @@ void fftr(const short *input, kiss_fft_scalar *out, size_t sampleSize, bool ster
 		{
 			kiss_fft_cpx &l = (ptrdata + sampleSize * 2)[i];
 			kiss_fft_cpx &r = (ptrdata + sampleSize * 3)[i];
-			out[i] = (abs(l.i * l.i + l.r + l.r) + abs(r.i * r.i + r.r * r.r)) * kiss_fft_scalar(0.5);
+			out[i] = (std::abs(l.i * l.i + l.r + l.r) + std::abs(r.i * r.i + r.r * r.r)) * kiss_fft_scalar(0.5);
 		}
 
 		delete[] ptrdata;
@@ -104,7 +106,7 @@ void fftr(const short *input, kiss_fft_scalar *out, size_t sampleSize, bool ster
 		for (size_t i = 0; i < sampleSize; i++)
 		{
 			kiss_fft_cpx &l = (ptrdata + sampleSize)[i];
-			out[i] = abs(l.i * l.i + l.r + l.r);
+			out[i] = std::abs(l.i * l.i + l.r + l.r);
 		}
 
 		delete[] ptrdata;
