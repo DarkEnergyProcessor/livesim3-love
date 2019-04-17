@@ -7,7 +7,8 @@ LOCAL_MODULE    := liblove
 LOCAL_CFLAGS    := -fexceptions -g -Dlinux -Dunix \
 	-DHAVE_GCC_DESTRUCTOR=1 -DOPT_GENERIC -DREAL_IS_FLOAT \
 	-DGL_GLEXT_PROTOTYPES -DLOVE_TURBO_JPEG -DLOVE_NO_DEVIL \
-	-DAL_ALEXT_PROTOTYPES -DLS2X_USE_KISSFFT -Dkiss_fft_scalar=double
+	-DAL_ALEXT_PROTOTYPES -DLS2X_USE_KISSFFT -Dkiss_fft_scalar=double \
+	-DLOVE_NO_MODPLUG=1
 
 LOCAL_CPPFLAGS  := ${LOCAL_CFLAGS} 
 
@@ -31,7 +32,6 @@ LOCAL_C_INCLUDES  :=  \
 	${LOCAL_PATH}/${OPENAL_INCLUDE_PATH} \
 	${LOCAL_PATH}/${FT2_INCLUDE_PATH} \
 	${LOCAL_PATH}/${MPG123_INCLUDE_PATH} \
-	${LOCAL_PATH}/${MODPLUG_INCLUDE_PATH} \
 	${LOCAL_PATH}/${VORBIS_INCLUDE_PATH} \
 	${LOCAL_PATH}/${LUA_INCLUDE_PATH} \
 	${LOCAL_PATH}/${OGG_INCLUDE_PATH} \
@@ -117,7 +117,7 @@ LOCAL_CXXFLAGS := -std=c++11
 
 LOCAL_SHARED_LIBRARIES := libopenal libmpg123 
 
-LOCAL_STATIC_LIBRARIES := libvorbis libogg libtheora libmodplug libfreetype libluajit SDL2_static
+LOCAL_STATIC_LIBRARIES := libvorbis libogg libtheora libfreetype libluajit SDL2_static
 
 # $(info liblove: include dirs $(LOCAL_C_INCLUDES))
 # $(info liblove: src files $(LOCAL_SRC_FILES))

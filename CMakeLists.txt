@@ -27,18 +27,39 @@ cmake_minimum_required(VERSION 3.1)
 
 project(love)
 
-set(LOVE_EXE_NAME love)
-set(LOVE_LIB_NAME liblove)
+###################################
+# Version
+###################################
+
+# Extract version.h contents.
+file(READ ${CMAKE_CURRENT_SOURCE_DIR}/src/common/version.h LOVE_VERSION_FILE_CONTENTS)
+
+# Extract one of LOVE_VERSION_MAJOR/MINOR/REV.
+function(match_version ARG_STRING OUT_VAR)
+	string(REGEX MATCH "VERSION_${ARG_STRING} = ([0-9]+);" TMP_VER "${LOVE_VERSION_FILE_CONTENTS}")
+	string(REGEX MATCH "[0-9]+" TMP_VER "${TMP_VER}")
+	set(${OUT_VAR} ${TMP_VER} PARENT_SCOPE)
+endfunction()
+
+match_version("MAJOR" LOVE_VERSION_MAJOR)
+match_version("MINOR" LOVE_VERSION_MINOR)
+match_version("REV" LOVE_VERSION_REV)
+
+set(LOVE_VERSION_STR "${LOVE_VERSION_MAJOR}.${LOVE_VERSION_MINOR}")
+
+message(STATUS "Version: ${LOVE_VERSION_STR}")
+
+# Build
+
+set(LOVE_EXE_NAME love_${LOVE_VERSION_STR})
+set(LOVE_LIB_NAME love${LOVE_VERSION_MAJOR})
 
 set(CMAKE_MODULE_PATH "${love_SOURCE_DIR}/extra/cmake" ${CMAKE_MODULE_PATH})
 # Needed for shared libs on Linux. (-fPIC).
 set(CMAKE_POSITION_INDEPENDENT_CODE TRUE)
 
-set (CMAKE_CXX_STANDARD 11)
-
-if(MSVC)
-	set(LOVE_CONSOLE_EXE_NAME lovec)
-endif()
+set(CMAKE_CXX_STANDARD_REQUIRED 1)
+set(CMAKE_CXX_STANDARD 11)
 
 if(CMAKE_SIZEOF_VOID_P EQUAL 8)
 	set(LOVE_X64 TRUE)
@@ -99,7 +120,6 @@ if(MEGA)
 		${MEGA_LIBVORBISFILE}
 		${MEGA_LIBVORBIS}
 		${MEGA_LIBTHEORA}
-		${MEGA_MODPLUG}
 		${MEGA_OPENAL}
 		${MEGA_SDL2MAIN}
 		${MEGA_SDL2}
@@ -164,17 +184,8 @@ if(MEGA)
 		# automatically.
 	endif()
 else()
-	if(MSVC)
-		message(FATAL_ERROR "
-It is currently only possible to build with megasource on Windows.
-Please see http://bitbucket.org/rude/megasource
-")
-	endif()
-
 	find_package(Freetype REQUIRED)
-	find_package(ModPlug REQUIRED)
 	find_package(OpenAL REQUIRED)
-	find_package(OpenGL REQUIRED)
 	find_package(SDL2 REQUIRED)
 	find_package(Theora REQUIRED)
 	find_package(Vorbis REQUIRED)
@@ -190,7 +201,7 @@ Please see http://bitbucket.org/rude/megasource
 		${VORBIS_INCLUDE_DIR}
 		${OPENAL_INCLUDE_DIR}
 		${ZLIB_INCLUDE_DIRS}
-		${MODPLUG_INCLUDE_DIR}
+		#${MODPLUG_INCLUDE_DIR}
 		${OGG_INCLUDE_DIR}
 		${THEORA_INCLUDE_DIR}
 	)
@@ -200,7 +211,7 @@ Please see http://bitbucket.org/rude/megasource
 		${SDL2_LIBRARY}
 		${FREETYPE_LIBRARY}
 		${OPENAL_LIBRARY}
-		${MODPLUG_LIBRARY}
+		#${MODPLUG_LIBRARY}
 		${THEORA_LIBRARY}
 		${THEORADEC_LIBRARY}
 		${VORBISFILE_LIBRARY}
@@ -919,8 +930,8 @@ set(LOVE_SRC_MODULE_SOUND_LULLABY
 	src/modules/sound/lullaby/FLACDecoder.h
 	src/modules/sound/lullaby/GmeDecoder.cpp
 	src/modules/sound/lullaby/GmeDecoder.h
-	src/modules/sound/lullaby/ModPlugDecoder.cpp
-	src/modules/sound/lullaby/ModPlugDecoder.h
+	#src/modules/sound/lullaby/ModPlugDecoder.cpp
+	#src/modules/sound/lullaby/ModPlugDecoder.h
 	src/modules/sound/lullaby/Sound.cpp
 	src/modules/sound/lullaby/Sound.h
 	src/modules/sound/lullaby/VorbisDecoder.cpp
@@ -1713,7 +1724,6 @@ set(LOVE_INCLUDE_DIRS
 	${LOVE_INCLUDE_DIRS}
 	src/ls2x/include
 )
-add_definitions(-DLS2X_USE_LIBAV -DLS2X_USE_KISSFFT -DLS2X_EMBEDDED_IN_LOVE -Dkiss_fft_scalar=double)
 
 #
 # liblove
@@ -1769,27 +1779,23 @@ if(MSVC)
 endif()
 
 add_library(${LOVE_LIB_NAME} SHARED ${LOVE_LIB_SRC} ${LOVE_RC})
+target_compile_definitions(${LOVE_LIB_NAME} PRIVATE -DLOVE_NO_MODPLUG=1 -DLS2X_USE_LIBAV -DLS2X_USE_KISSFFT -DLS2X_EMBEDDED_IN_LOVE -Dkiss_fft_scalar=double)
 target_link_libraries(${LOVE_LIB_NAME} ${LOVE_LINK_LIBRARIES} ${LOVE_3P})
 
 if(LOVE_EXTRA_DEPENDECIES)
 	add_dependencies(${LOVE_LIB_NAME} ${LOVE_EXTRA_DEPENDECIES})
 endif()
 
-if(MSVC)
-	set_target_properties(${LOVE_LIB_NAME} PROPERTIES RELEASE_OUTPUT_NAME "love" PDB_NAME "liblove" IMPORT_PREFIX "lib")
-	set_target_properties(${LOVE_LIB_NAME} PROPERTIES DEBUG_OUTPUT_NAME "love" PDB_NAME "liblove" IMPORT_PREFIX "lib")
-endif()
 
 #
 # love (executable)
 #
-add_executable(${LOVE_EXE_NAME} WIN32 src/love.cpp ${LOVE_RC})
+add_executable(${LOVE_EXE_NAME} src/love.cpp ${LOVE_RC})
 target_link_libraries(${LOVE_EXE_NAME} ${LOVE_LIB_NAME})
 
-if(MSVC)
-	add_executable(${LOVE_CONSOLE_EXE_NAME} src/love.cpp ${LOVE_RC})
-	target_link_libraries(${LOVE_CONSOLE_EXE_NAME} ${LOVE_LIB_NAME})
-endif()
+# Install
+install(TARGETS ${LOVE_LIB_NAME} DESTINATION .)
+install(TARGETS ${LOVE_EXE_NAME} DESTINATION .)
 
 function(post_step_move_dll ARG_POST_TARGET ARG_TARGET_OR_FILE)
 	if(TARGET ${ARG_TARGET_OR_FILE})
@@ -1810,40 +1816,9 @@ endfunction()
 # running/debugging the binary will not work from inside VS.
 if(LOVE_MOVE_DLLS)
 	foreach(DLL ${LOVE_MOVE_DLLS})
-		post_step_move_dll(love ${DLL})
+		post_step_move_dll(${LOVE_LIB_NAME} ${DLL})
 	endforeach()
 endif()
-
-if (NOT MSVC)
-	return()
-endif()
-
-###################################
-# Version
-###################################
-
-# Extract version.h contents.
-file(READ ${CMAKE_CURRENT_SOURCE_DIR}/src/common/version.h LOVE_VERSION_FILE_CONTENTS)
-
-# Extract one of LOVE_VERSION_MAJOR/MINOR/REV.
-function(match_version ARG_STRING OUT_VAR)
-	string(REGEX MATCH "VERSION_${ARG_STRING} = ([0-9]+);" TMP_VER "${LOVE_VERSION_FILE_CONTENTS}")
-	string(REGEX MATCH "[0-9]+" TMP_VER "${TMP_VER}")
-	set(${OUT_VAR} ${TMP_VER} PARENT_SCOPE)
-endfunction()
-
-match_version("MAJOR" LOVE_VERSION_MAJOR)
-match_version("MINOR" LOVE_VERSION_MINOR)
-match_version("REV" LOVE_VERSION_REV)
-
-set(LOVE_VERSION_STR "${LOVE_VERSION_MAJOR}.${LOVE_VERSION_MINOR}")
-
-message(STATUS "Version: ${LOVE_VERSION_STR}")
-
-###################################
-# CPack
-###################################
-install(TARGETS ${LOVE_EXE_NAME} ${LOVE_CONSOLE_EXE_NAME} ${LOVE_LIB_NAME} RUNTIME DESTINATION .)
 
 # Extra DLLs.
 if(LOVE_EXTRA_DLLS)
@@ -1854,14 +1829,12 @@ if(LOVE_EXTRA_DLLS)
 	install(FILES ${LOVE_EXTRA_DLLS} DESTINATION .)
 endif()
 
-# Dynamic runtime libs.
-if(LOVE_MSVC_DLLS)
-	foreach(DLL ${LOVE_MSVC_DLLS})
-		get_filename_component(DLL_NAME ${DLL} NAME)
-		message(STATUS "Runtime DLL: ${DLL_NAME}")
-	endforeach()
-	install(FILES ${LOVE_MSVC_DLLS} DESTINATION .)
-endif()
+# No CPack for u
+return()
+
+###################################
+# CPack
+###################################
 
 # Copy a text file from CMAKE_CURRENT_SOURCE_DIR to CMAKE_CURRENT_BINARY_DIR.
 # On Windows, this function will convert line endings to CR,LF.
