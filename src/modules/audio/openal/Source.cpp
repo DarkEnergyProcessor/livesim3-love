@@ -137,7 +137,7 @@ Source::Source(Pool *pool, love::sound::SoundData *soundData)
 	setFloatv(velocity, z);
 	setFloatv(direction, z);
 
-	for (unsigned int i = 0; i < (unsigned int)audiomodule()->getMaxSourceEffects(); i++)
+	for (int i = 0; i < audiomodule()->getMaxSourceEffects(); i++)
 		slotlist.push(i);
 }
 
@@ -172,7 +172,7 @@ Source::Source(Pool *pool, love::sound::Decoder *decoder)
 	setFloatv(velocity, z);
 	setFloatv(direction, z);
 
-	for (unsigned int i = 0; i < (unsigned int)audiomodule()->getMaxSourceEffects(); i++)
+	for (int i = 0; i < audiomodule()->getMaxSourceEffects(); i++)
 		slotlist.push(i);
 }
 
@@ -212,7 +212,7 @@ Source::Source(Pool *pool, int sampleRate, int bitDepth, int channels, int buffe
 	setFloatv(velocity, z);
 	setFloatv(direction, z);
 
-	for (unsigned int i = 0; i < (unsigned int)audiomodule()->getMaxSourceEffects(); i++)
+	for (int i = 0; i < audiomodule()->getMaxSourceEffects(); i++)
 		slotlist.push(i);
 }
 
@@ -274,7 +274,7 @@ Source::Source(const Source &s)
 	setFloatv(velocity, s.velocity);
 	setFloatv(direction, s.direction);
 
-	for (unsigned int i = 0; i < (unsigned int)audiomodule()->getMaxSourceEffects(); i++)
+	for (int i = 0; i < audiomodule()->getMaxSourceEffects(); i++)
 	{
 		// filter out already taken slots
 		bool push = true;
@@ -396,36 +396,39 @@ bool Source::update()
 		case TYPE_STREAM:
 			if (!isFinished())
 			{
-				ALint processed;
-				ALuint buffers[MAX_BUFFERS];
-				float curOffsetSamples, curOffsetSecs, newOffsetSamples, newOffsetSecs;
 				int freq = decoder->getSampleRate();
 
-				alGetSourcef(source, AL_SAMPLE_OFFSET, &curOffsetSamples);
-				curOffsetSecs = curOffsetSamples / freq;
-
+				ALint processed;
 				alGetSourcei(source, AL_BUFFERS_PROCESSED, &processed);
-				alSourceUnqueueBuffers(source, processed, buffers);
 
-				alGetSourcef(source, AL_SAMPLE_OFFSET, &newOffsetSamples);
-				newOffsetSecs = newOffsetSamples / freq;
-
-				offsetSamples += (curOffsetSamples - newOffsetSamples);
-				offsetSeconds += (curOffsetSecs - newOffsetSecs);
-
-				for (unsigned int i = 0; i < (unsigned int)processed; i++)
-					unusedBuffers.push(buffers[i]);
-
-				while (!unusedBuffers.empty())
+				// It would theoretically be better to unqueue all processed
+				// buffers in a single call to alSourceUnqueueBuffers, but on
+				// iOS I observed occasional (every ~5-10 seconds) pops in the
+				// streaming source test I was using, when doing that. Perhaps
+				// there was a bug in this code when I was testing, or maybe
+				// this code runs into the same problem but now it's much harder
+				// to reproduce. The test I used is the play-stop-play .love
+				// from https://bitbucket.org/rude/love/issues/1484/
+				while (processed--)
 				{
-					auto b = unusedBuffers.top();
-					if (streamAtomic(b, decoder.get()) > 0)
-					{
-						alSourceQueueBuffers(source, 1, &b);
-						unusedBuffers.pop();
-					}
+					float curOffsetSamples, curOffsetSecs;
+					alGetSourcef(source, AL_SAMPLE_OFFSET, &curOffsetSamples);
+					curOffsetSecs = curOffsetSamples / freq;
+
+					ALuint buffer;
+					alSourceUnqueueBuffers(source, 1, &buffer);
+
+					float newOffsetSamples, newOffsetSecs;
+					alGetSourcef(source, AL_SAMPLE_OFFSET, &newOffsetSamples);
+					newOffsetSecs = newOffsetSamples / freq;
+
+					offsetSamples += (curOffsetSamples - newOffsetSamples);
+					offsetSeconds += (curOffsetSecs - newOffsetSecs);
+
+					if (streamAtomic(buffer, decoder.get()) > 0)
+						alSourceQueueBuffers(source, 1, &buffer);
 					else
-						break;
+						unusedBuffers.push(buffer);
 				}
 
 				return true;
@@ -439,7 +442,7 @@ bool Source::update()
 			alGetSourcei(source, AL_BUFFERS_PROCESSED, &processed);
 			alSourceUnqueueBuffers(source, processed, buffers);
 
-			for (unsigned int i = 0; i < (unsigned int)processed; i++)
+			for (int i = 0; i < processed; i++)
 			{
 				ALint size;
 				alGetBufferi(buffers[i], AL_SIZE, &size);
@@ -863,6 +866,9 @@ void Source::prepareAtomic()
 	case TYPE_MAX_ENUM:
 		break;
 	}
+
+	// Seek to the current/pending offset.
+	alSourcef(source, AL_SAMPLE_OFFSET, offsetSamples);
 }
 
 void Source::teardownAtomic()
@@ -873,31 +879,32 @@ void Source::teardownAtomic()
 		break;
 	case TYPE_STREAM:
 	{
-		ALint queued;
-		ALuint buffer;
+		ALint queued = 0;
+		ALuint buffers[MAX_BUFFERS];
 
 		decoder->seek(0);
-		// drain buffers
-		//since we only unqueue 1 buffer, it's OK to use singular variable pointer instead of array
+
+		// Drain buffers.
+		// NOTE: The Apple implementation of OpenAL on iOS doesn't return
+		// correct buffer ids for single alSourceUnqueueBuffers calls past the
+		// first queued buffer, so we must unqueue them all at once.
 		alGetSourcei(source, AL_BUFFERS_QUEUED, &queued);
-		for (unsigned int i = 0; i < (unsigned int)queued; i++)
-		{
-			alSourceUnqueueBuffers(source, 1, &buffer);
-			unusedBuffers.push(buffer);
-		}
+		alSourceUnqueueBuffers(source, queued, buffers);
+
+		for (int i = 0; i < queued; i++)
+			unusedBuffers.push(buffers[i]);
 		break;
 	}
 	case TYPE_QUEUE:
 	{
 		ALint queued;
-		ALuint buffer;
+		ALuint buffers[MAX_BUFFERS];
 
 		alGetSourcei(source, AL_BUFFERS_QUEUED, &queued);
-		for (unsigned int i = (unsigned int)queued; i > 0; i--)
-		{
-			alSourceUnqueueBuffers(source, 1, &buffer);
-			unusedBuffers.push(buffer);
-		}
+		alSourceUnqueueBuffers(source, queued, buffers);
+
+		for (int i = 0; i < queued; i++)
+			unusedBuffers.push(buffers[i]);
 		break;
 	}
 	case TYPE_MAX_ENUM:
@@ -929,17 +936,14 @@ bool Source::playAtomic(ALuint source)
 		if (!isPlaying())
 			success = false;
 	}
-	else if (success)
-	{
-		alSourcef(source, AL_SAMPLE_OFFSET, offsetSamples);
-		success = alGetError() == AL_NO_ERROR;
-	}
 
 	if (!success)
 	{
 		valid = true; //stop() needs source to be valid
 		stop();
 	}
+
+	// Static sources: reset the pending offset since it's not valid anymore.
 	if (sourceType != TYPE_STREAM)
 		offsetSamples = offsetSeconds = 0;
 
