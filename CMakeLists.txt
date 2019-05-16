@@ -27,6 +27,12 @@ cmake_minimum_required(VERSION 3.1)
 
 project(love)
 
+if(LOVE_BUILD_STATICLIB)
+	set(LOVE_BUILD_EXE 0)
+else()
+	set(LOVE_BUILD_EXE 1)
+endif()
+
 ###################################
 # Version
 ###################################
@@ -53,6 +59,7 @@ message(STATUS "Version: ${LOVE_VERSION_STR}")
 
 set(LOVE_EXE_NAME love_${LOVE_VERSION_STR})
 set(LOVE_LIB_NAME love${LOVE_VERSION_MAJOR})
+set(LOVE_LIB_NAME ${LOVE_LIB_NAME} PARENT_SCOPE)
 
 set(CMAKE_MODULE_PATH "${love_SOURCE_DIR}/extra/cmake" ${CMAKE_MODULE_PATH})
 # Needed for shared libs on Linux. (-fPIC).
@@ -1778,7 +1785,12 @@ if(MSVC)
 	)
 endif()
 
-add_library(${LOVE_LIB_NAME} SHARED ${LOVE_LIB_SRC} ${LOVE_RC})
+if(LOVE_BUILD_EXE)
+	add_library(${LOVE_LIB_NAME} SHARED ${LOVE_LIB_SRC} ${LOVE_RC})
+else()
+	add_library(${LOVE_LIB_NAME} STATIC ${LOVE_LIB_SRC} ${LOVE_RC})
+endif()
+
 target_compile_definitions(${LOVE_LIB_NAME} PRIVATE -DLOVE_NO_MODPLUG=1 -DLS2X_USE_LIBAV -DLS2X_USE_KISSFFT -DLS2X_EMBEDDED_IN_LOVE -Dkiss_fft_scalar=double)
 target_link_libraries(${LOVE_LIB_NAME} ${LOVE_LINK_LIBRARIES} ${LOVE_3P})
 
@@ -1786,16 +1798,18 @@ if(LOVE_EXTRA_DEPENDECIES)
 	add_dependencies(${LOVE_LIB_NAME} ${LOVE_EXTRA_DEPENDECIES})
 endif()
 
+install(TARGETS ${LOVE_LIB_NAME} DESTINATION .)
+
 
 #
 # love (executable)
 #
-add_executable(${LOVE_EXE_NAME} src/love.cpp ${LOVE_RC})
-target_link_libraries(${LOVE_EXE_NAME} ${LOVE_LIB_NAME})
 
-# Install
-install(TARGETS ${LOVE_LIB_NAME} DESTINATION .)
-install(TARGETS ${LOVE_EXE_NAME} DESTINATION .)
+if(LOVE_BUILD_EXE)
+	add_executable(${LOVE_EXE_NAME} src/love.cpp ${LOVE_RC})
+	target_link_libraries(${LOVE_EXE_NAME} ${LOVE_LIB_NAME})
+	install(TARGETS ${LOVE_EXE_NAME} DESTINATION .)
+endif()
 
 function(post_step_move_dll ARG_POST_TARGET ARG_TARGET_OR_FILE)
 	if(TARGET ${ARG_TARGET_OR_FILE})

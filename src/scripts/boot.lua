@@ -20,6 +20,7 @@ freely, subject to the following restrictions:
 
 -- Make sure love exists.
 local love = require("love")
+local LOVE_USED_AS_CPP = not(not(LOVE_USED_AS_CPP))
 
 -- Used for setup:
 love.path = {}
@@ -101,7 +102,7 @@ end
 -- will typically the executable, for instance "lua5.1.exe".
 function love.arg.getLow(a)
 	local m = math.huge
-	for k,v in pairs(a) do
+	for k in pairs(a) do
 		if k < m then
 			m = k
 		end
@@ -111,9 +112,12 @@ end
 
 love.arg.options = {
 	console = { a = 0 },
-	fused = {a = 0 },
-	game = { a = 1 }
 }
+
+if not(LOVE_USED_AS_CPP) then
+	love.arg.options.game = {a = 1}
+	love.arg.options.fused = {a = 0}
+end
 
 love.arg.optionIndices = {}
 
@@ -276,7 +280,7 @@ function love.createhandlers()
 			if love.displayrotated then return love.displayrotated(display, orient) end
 		end,
 	}, {
-		__index = function(self, name)
+		__index = function(_, name)
 			error("Unknown event: " .. name)
 		end,
 	})
@@ -293,6 +297,46 @@ local no_game_code = false
 local invalid_game_path = nil
 
 -- This can't be overridden.
+if LOVE_USED_AS_CPP then
+function love.boot()
+
+	-- This is absolutely needed.
+	require("love.filesystem")
+
+	local arg0 = love.arg.getLow(arg)
+	pcall(love.filesystem.init, arg0)
+
+	local exepath = love.filesystem.getExecutablePath()
+	if #exepath == 0 then
+		-- This shouldn't happen, but just in case we'll fall back to arg0.
+		exepath = arg0
+	end
+
+	no_game_code = false
+	invalid_game_path = nil
+
+	local exedir
+	if exepath == arg0 then
+		exedir = love.filesystem.getWorkingDirectory()
+	else
+		exedir = exepath:sub(1, #exepath - #love.path.leaf(exepath))
+	end
+	love.filesystem.setSource(love.path.normalslashes(exedir))
+
+	love.filesystem.setFused(false)
+	love.setDeprecationOutput(true)
+
+	local identity = love.path.leaf(exepath)
+	identity = identity:gsub("^([%.]+)", "") -- strip leading "."'s
+	identity = identity:gsub("%.([^%.]+)$", "") -- strip extension
+	identity = identity:gsub("%.", "_") -- replace remaining "."'s with "_"
+	identity = #identity > 0 and identity or "lovegame"
+
+	-- When conf.lua is initially loaded, the main source should be checked
+	-- before the save directory (the identity should be appended.)
+	pcall(love.filesystem.setIdentity, identity, true)
+end
+else
 function love.boot()
 
 	-- This is absolutely needed.
@@ -376,6 +420,7 @@ function love.boot()
 		nogame()
 	end
 end
+end
 
 function love.init()
 
@@ -442,7 +487,8 @@ function love.init()
 
 	-- If config file exists, load it and allow it to update config table.
 	local confok, conferr
-	if (not love.conf) and love.filesystem and love.filesystem.getInfo("conf.lua") then
+	local confstatus = LOVE_USED_AS_CPP or love.filesystem.getInfo("conf.lua")
+	if (not love.conf) and love.filesystem and confstatus then
 		confok, conferr = pcall(require, "conf")
 	end
 
@@ -473,7 +519,7 @@ function love.init()
 	end
 
 	-- Gets desired modules.
-	for k,v in ipairs{
+	for _,v in ipairs{
 		"data",
 		"thread",
 		"timer",
@@ -557,15 +603,18 @@ function love.init()
 	if love.filesystem then
 		love.filesystem._setAndroidSaveExternal(c.externalstorage)
 		love.filesystem.setIdentity(c.identity or love.filesystem.getIdentity(), c.appendidentity)
+	end
+
+	if not(LOVE_USED_AS_CPP) then
 		if love.filesystem.getInfo("main.lua") then
 			require("main")
 		end
-	end
 
-	if no_game_code then
-		error("No code to run\nYour game might be packaged incorrectly.\nMake sure main.lua is at the top level of the zip.")
-	elseif invalid_game_path then
-		error("Cannot load game at path '" .. invalid_game_path .. "'.\nMake sure a folder exists at the specified path.")
+		if no_game_code then
+			error("No code to run\nYour game might be packaged incorrectly.\nMake sure main.lua is at the top level of the zip.")
+		elseif invalid_game_path then
+			error("Cannot load game at path '" .. invalid_game_path .. "'.\nMake sure a folder exists at the specified path.")
+		end
 	end
 end
 
@@ -655,14 +704,14 @@ function love.errhand(msg)
 	end
 	if love.joystick then
 		-- Stop all joystick vibrations.
-		for i,v in ipairs(love.joystick.getJoysticks()) do
+		for _,v in ipairs(love.joystick.getJoysticks()) do
 			v:setVibration()
 		end
 	end
 	if love.audio then love.audio.stop() end
 
 	love.graphics.reset()
-	local font = love.graphics.setNewFont(14)
+	love.graphics.setNewFont(14)
 
 	love.graphics.setColor(1, 1, 1, 1)
 
@@ -721,7 +770,7 @@ function love.errhand(msg)
 	return function()
 		love.event.pump()
 
-		for e, a, b, c in love.event.poll() do
+		for e, a in love.event.poll() do
 			if e == "quit" then
 				return 1
 			elseif e == "keypressed" and a == "escape" then
@@ -760,6 +809,7 @@ end
 return function()
 	local func
 	local inerror = false
+	local luamode = not(LOVE_USED_AS_CPP)
 
 	local function deferErrhand(...)
 		local errhand = love.errorhandler or love.errhand
@@ -792,7 +842,7 @@ return function()
 	while func do
 		local _, retval = xpcall(func, deferErrhand)
 		if retval then return retval end
-		coroutine.yield()
+		if luamode then coroutine.yield() end
 	end
 
 	return 1
