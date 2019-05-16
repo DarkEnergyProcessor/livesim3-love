@@ -59,7 +59,11 @@ message(STATUS "Version: ${LOVE_VERSION_STR}")
 
 set(LOVE_EXE_NAME love_${LOVE_VERSION_STR})
 set(LOVE_LIB_NAME love${LOVE_VERSION_MAJOR})
-set(LOVE_LIB_NAME ${LOVE_LIB_NAME} PARENT_SCOPE)
+
+get_directory_property(IS_INCLUDED_FROM_OTHER PARENT_DIRECTORY)
+if(IS_INCLUDED_FROM_OTHER)
+	set(LOVE_LIB_NAME ${LOVE_LIB_NAME} PARENT_SCOPE)
+endif()
 
 set(CMAKE_MODULE_PATH "${love_SOURCE_DIR}/extra/cmake" ${CMAKE_MODULE_PATH})
 # Needed for shared libs on Linux. (-fPIC).
