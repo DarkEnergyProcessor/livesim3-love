@@ -1795,6 +1795,12 @@ else()
 	add_library(${LOVE_LIB_NAME} STATIC ${LOVE_LIB_SRC} ${LOVE_RC})
 endif()
 
+target_include_directories(${LOVE_LIB_NAME} PUBLIC
+	src
+	src/libraries
+	src/modules
+	${LOVE_INCLUDE_DIRS}
+)
 target_compile_definitions(${LOVE_LIB_NAME} PRIVATE -DLOVE_NO_MODPLUG=1 -DLS2X_USE_LIBAV -DLS2X_USE_KISSFFT -DLS2X_EMBEDDED_IN_LOVE -Dkiss_fft_scalar=double)
 target_link_libraries(${LOVE_LIB_NAME} ${LOVE_LINK_LIBRARIES} ${LOVE_3P})
 
