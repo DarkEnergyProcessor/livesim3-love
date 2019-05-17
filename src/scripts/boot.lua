@@ -615,6 +615,8 @@ function love.init()
 		elseif invalid_game_path then
 			error("Cannot load game at path '" .. invalid_game_path .. "'.\nMake sure a folder exists at the specified path.")
 		end
+	else
+		require("main")
 	end
 end
 
