@@ -6,7 +6,7 @@ extern "C"
 }
 
 LVEPDecoder::LVEPDecoder(love::filesystem::FileData *data, int bufferSize)
-	: love::sound::Decoder(data, data->getExtension(), bufferSize)
+	: love::sound::Decoder(data,  bufferSize)
 	, stream(data, FFMpegStream::TYPE_AUDIO)
 	, frame(nullptr)
 	, f(ls2x::libav::getFunctionPointer())
