@@ -425,6 +425,18 @@ bool Source::update()
 						unusedBuffers.push(buffer);
 				}
 
+				while (!unusedBuffers.empty())
+				{
+					ALuint b = unusedBuffers.top();
+					if (streamAtomic(b, decoder.get()) > 0)
+					{
+						alSourceQueueBuffers(source, 1, &b);
+						unusedBuffers.pop();
+					}
+					else
+						break;
+				}
+
 				return true;
 			}
 			return false;
@@ -494,23 +506,23 @@ float Source::getVolume() const
 	return volume;
 }
 
-void Source::seek(float offset, Source::Unit unit)
+void Source::seek(double offset, Source::Unit unit)
 {
 	Lock l = pool->lock();
 
 	int offsetSamples = 0;
-	float offsetSeconds = 0.0f;
+	double offsetSeconds = 0.0f;
 
 	switch (unit)
 	{
 	case Source::UNIT_SAMPLES:
-		offsetSamples = offset;
-		offsetSeconds = offset / sampleRate;
+		offsetSamples = (int) offset;
+		offsetSeconds = offset / (double) sampleRate;
 		break;
 	case Source::UNIT_SECONDS:
 	default:
 		offsetSeconds = offset;
-		offsetSamples = offset * sampleRate;
+		offsetSamples = (int) (offset * sampleRate);
 		break;
 	}
 
@@ -561,12 +573,13 @@ void Source::seek(float offset, Source::Unit unit)
 				}
 				if (unusedBuffers.empty())
 					offsetSamples = 0;
-				offsetSeconds = offsetSamples / sampleRate;
+				offsetSeconds = offsetSamples / (double) sampleRate;
 			}
 			break;
 		case TYPE_MAX_ENUM:
 			break;
 	}
+
 	if (wasPlaying && (alGetError() == AL_INVALID_VALUE || (sourceType == TYPE_STREAM && !isPlaying())))
 	{
 		stop();
@@ -574,10 +587,11 @@ void Source::seek(float offset, Source::Unit unit)
 			play();
 		return;
 	}
+
 	this->offsetSamples = offsetSamples;
 }
 
-float Source::tell(Source::Unit unit)
+double Source::tell(Source::Unit unit)
 {
 	Lock l = pool->lock();
 
@@ -589,7 +603,7 @@ float Source::tell(Source::Unit unit)
 	offset += offsetSamples;
 
 	if (unit == UNIT_SECONDS)
-		return offset / (float)sampleRate;
+		return offset / (double) sampleRate;
 	else
 		return offset;
 }
@@ -855,7 +869,7 @@ void Source::prepareAtomic()
 	}
 
 	// Seek to the current/pending offset.
-	alSourcef(source, AL_SAMPLE_OFFSET, offsetSamples);
+	alSourcei(source, AL_SAMPLE_OFFSET, offsetSamples);
 }
 
 void Source::teardownAtomic()
@@ -869,7 +883,8 @@ void Source::teardownAtomic()
 		ALint queued = 0;
 		ALuint buffers[MAX_BUFFERS];
 
-		decoder->seek(0);
+		// Some decoders (e.g. ModPlug) can rewind() more reliably than seek(0).
+		decoder->rewind();
 
 		// Drain buffers.
 		// NOTE: The Apple implementation of OpenAL on iOS doesn't return
