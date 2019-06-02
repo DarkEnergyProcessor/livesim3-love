@@ -16,15 +16,14 @@ extern "C"
 class LVEPDecoder : public love::sound::Decoder
 {
 public:
-	LVEPDecoder(love::filesystem::FileData *data, int bufferSize);
-	LVEPDecoder(love::Data *data, const std::string &ext, int bufferSize);
+	LVEPDecoder(love::Data *data, int bufferSize);
 	virtual ~LVEPDecoder();
 
 	love::sound::Decoder *clone();
 	int decode();
 	int getSize() const;
 	void *getBuffer() const;
-	bool seek(float s);
+	bool seek(double s);
 	bool rewind();
 	bool isSeekable();
 	bool isFinished();

@@ -5,7 +5,7 @@ extern "C"
 #include <libavutil/opt.h>
 }
 
-LVEPDecoder::LVEPDecoder(love::filesystem::FileData *data, int bufferSize)
+LVEPDecoder::LVEPDecoder(love::Data *data, int bufferSize)
 	: love::sound::Decoder(data,  bufferSize)
 	, stream(data, FFMpegStream::TYPE_AUDIO)
 	, frame(nullptr)
@@ -69,7 +69,7 @@ int LVEPDecoder::decode()
 	return decoded*frame->channels*2;
 }
 
-bool LVEPDecoder::seek(float s)
+bool LVEPDecoder::seek(double s)
 {
 	eof = false;
 	return stream.seek(s);

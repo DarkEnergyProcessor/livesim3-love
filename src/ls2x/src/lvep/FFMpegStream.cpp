@@ -20,7 +20,7 @@ FFMpegStream::FFMpegStream(love::filesystem::File *file, StreamType type)
 	initialize();
 }
 
-FFMpegStream::FFMpegStream(love::filesystem::FileData *fileData, StreamType type)
+FFMpegStream::FFMpegStream(love::Data *fileData, StreamType type)
 	: ioContext(fileData)
 	, formatContext(nullptr)
 	, codecContext(nullptr)
@@ -37,7 +37,6 @@ void FFMpegStream::initialize()
 {
 	std::string filename = "";
 	if (file.operator love::filesystem::File *()) filename = file->getFilename();
-	else if (fileData.operator love::filesystem::FileData *()) filename = fileData->getFilename();
 
 	try
 	{
