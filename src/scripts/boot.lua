@@ -309,14 +309,14 @@ function love.boot()
 	local exepath = love.filesystem.getExecutablePath()
 	if #exepath == 0 then
 		-- This shouldn't happen, but just in case we'll fall back to arg0.
-		exepath = arg0
+		exepath = nil
 	end
 
 	no_game_code = false
 	invalid_game_path = nil
 
 	local exedir
-	if exepath == arg0 then
+	if exepath == nil then
 		exedir = love.filesystem.getWorkingDirectory()
 	else
 		exedir = exepath:sub(1, #exepath - #love.path.leaf(exepath))
