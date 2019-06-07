@@ -3,7 +3,10 @@
 #include <fstream>
 
 // Lua
-#include <lua.hpp>
+extern "C"
+{
+#include "lua.h"
+}
 
 // LOVE
 #include <common/runtime.h>
