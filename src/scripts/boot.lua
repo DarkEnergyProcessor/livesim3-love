@@ -446,6 +446,7 @@ function love.init()
 			resizable = false,
 			centered = true,
 			highdpi = false,
+			usedpiscale = true,
 		},
 		modules = {
 			data = true,
@@ -585,6 +586,7 @@ function love.init()
 			centered = c.window.centered,
 			display = c.window.display,
 			highdpi = c.window.highdpi,
+			usedpiscale = c.window.usedpiscale,
 			x = c.window.x,
 			y = c.window.y,
 		}), "Could not set window mode")
