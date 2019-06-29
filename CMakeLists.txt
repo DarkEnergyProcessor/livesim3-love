@@ -957,6 +957,12 @@ if(LOVE_MPG123)
 		src/modules/sound/lullaby/Mpg123Decoder.cpp
 		src/modules/sound/lullaby/Mpg123Decoder.h
 	)
+else()
+	set(LOVE_SRC_MODULE_SOUND_LULLABY
+		${LOVE_SRC_MODULE_SOUND_LULLABY}
+		src/modules/sound/lullaby/MP3Decoder.cpp
+		src/modules/sound/lullaby/MP3Decoder.h
+	)
 endif()
 
 set(LOVE_SRC_MODULE_SOUND
@@ -1278,6 +1284,16 @@ set(LOVE_SRC_3P_DRFLAC
 )
 
 # dr_flac has no implementation files of its own.
+
+#
+# dr_mp3
+#
+
+set(LOVE_SRC_3P_DR_MP3
+	src/libraries/dr_mp3/dr_mp3.h
+)
+
+# dr_mp3 has no implementation files of its own.
 
 #
 # enet

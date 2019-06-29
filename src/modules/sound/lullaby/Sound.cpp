@@ -33,6 +33,8 @@
 
 #ifndef LOVE_NOMPG123
 #	include "Mpg123Decoder.h"
+#else
+#	include "MP3Decoder.h"
 #endif // LOVE_NOMPG123
 
 #ifdef LOVE_SUPPORT_COREAUDIO
@@ -94,6 +96,8 @@ sound::Decoder *Sound::newDecoder(love::filesystem::FileData *data, int bufferSi
 #endif // LOVE_NO_MODPLUG
 #ifndef LOVE_NOMPG123
 		DecoderImplFor<Mpg123Decoder>(),
+#else
+		DecoderImplFor<MP3Decoder>(),
 #endif // LOVE_NOMPG123
 		DecoderImplFor<VorbisDecoder>(),
 #ifdef LOVE_SUPPORT_GME
