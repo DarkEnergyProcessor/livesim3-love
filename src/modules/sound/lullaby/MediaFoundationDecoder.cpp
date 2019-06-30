@@ -45,6 +45,7 @@ const IID MFAttributes = {0x2cd2d921, 0xc447, 0x44a7, {0xa1, 0x3c, 0x4a, 0xda, 0
 namespace
 {
 
+typedef decltype(SHCreateMemStream) CreateMemStreamFunc;
 typedef decltype(MFCreateMFByteStreamOnStream) CreateByteStreamFunc;
 typedef decltype(MFCreateMediaType) CreateMediaTypeFunc;
 typedef decltype(MFCreateSourceReaderFromByteStream) CreateSourceReaderFunc;
@@ -54,8 +55,10 @@ typedef decltype(MFShutdown) ShutdownFunc;
 struct MFInitData
 {
 	bool success;
-	HMODULE mfPlat, mfReadWrite;
+	HMODULE shlwapi, mfPlat, mfReadWrite;
 
+	// shlwapi.dll
+	CreateMemStreamFunc *createMemoryStream;
 	// mfplat.dll
 	CreateByteStreamFunc *createByteStream;
 	CreateMediaTypeFunc *createMediaType;
@@ -101,7 +104,7 @@ MFDecoder::MFDecoder(Data *data, int bufferSize)
 	try
 	{
 		// Create memory stream
-		mfData.memoryStream = SHCreateMemStream((BYTE *) data->getData(), data->getSize());
+		mfData.memoryStream = init.createMemoryStream((BYTE *) data->getData(), data->getSize());
 		if (mfData.memoryStream == nullptr)
 			throw love::Exception("Cannot create IStream interface.");
 
@@ -375,37 +378,65 @@ bool MFDecoder::initialize()
 	MFDecoder::initData = &init;
 	init.success = false;
 
-	if ((init.mfPlat = LoadLibraryA("mfplat.dll")) == nullptr)
+	if ((init.shlwapi = LoadLibraryA("Shlwapi.dll")) == nullptr)
 		return false;
+
+	// Load SHCreateMemStream
+	init.createMemoryStream = (CreateMemStreamFunc *) GetProcAddress(init.shlwapi, "SHCreateMemStream");
+	if (init.createMemoryStream == nullptr)
+	{
+		// https://docs.microsoft.com/en-us/windows/desktop/api/shlwapi/nf-shlwapi-shcreatememstream
+		// Prior to Windows Vista, this function was not included in the public Shlwapi.h file, nor
+		// was it exported by name from Shlwapi.dll. To use it on earlier systems, you must call it
+		// directly from the Shlwapi.dll file as ordinal 12.
+		init.createMemoryStream = (CreateMemStreamFunc *) GetProcAddress(init.shlwapi, MAKEINTRESOURCEA(12));
+		if (init.createMemoryStream == nullptr)
+		{
+			// Ok failed
+			FreeLibrary(init.shlwapi);
+			return false;
+		}
+	}
+
+	if ((init.mfPlat = LoadLibraryA("mfplat.dll")) == nullptr)
+	{
+		FreeLibrary(init.shlwapi);
+		return false;
+	}
 
 	init.createByteStream = (CreateByteStreamFunc *) GetProcAddress(init.mfPlat, "MFCreateMFByteStreamOnStream");
 	if (init.createByteStream == nullptr)
 	{
 		FreeLibrary(init.mfPlat);
+		FreeLibrary(init.shlwapi);
 		return false;
 	}
 	init.createMediaType = (CreateMediaTypeFunc *) GetProcAddress(init.mfPlat, "MFCreateMediaType");
 	if (init.createMediaType == nullptr)
 	{
 		FreeLibrary(init.mfPlat);
+		FreeLibrary(init.shlwapi);
 		return false;
 	}
 	init.startup = (StartupFunc *) GetProcAddress(init.mfPlat, "MFStartup");
 	if (init.startup == nullptr)
 	{
 		FreeLibrary(init.mfPlat);
+		FreeLibrary(init.shlwapi);
 		return false;
 	}
 	init.shutdown = (ShutdownFunc *) GetProcAddress(init.mfPlat, "MFShutdown");
 	if (init.shutdown == nullptr)
 	{
 		FreeLibrary(init.mfPlat);
+		FreeLibrary(init.shlwapi);
 		return false;
 	}
 
 	if ((init.mfReadWrite = LoadLibraryA("mfreadwrite.dll")) == nullptr)
 	{
 		FreeLibrary(init.mfPlat);
+		FreeLibrary(init.shlwapi);
 		return false;
 	}
 
@@ -414,6 +445,7 @@ bool MFDecoder::initialize()
 	{
 		FreeLibrary(init.mfReadWrite);
 		FreeLibrary(init.mfPlat);
+		FreeLibrary(init.shlwapi);
 		return false;
 	}
 
@@ -421,14 +453,16 @@ bool MFDecoder::initialize()
 	{
 		FreeLibrary(init.mfReadWrite);
 		FreeLibrary(init.mfPlat);
+		FreeLibrary(init.shlwapi);
 		return false;
 	}
 
 	if (FAILED(init.startup(MF_VERSION, MFSTARTUP_NOSOCKET)))
 	{
+		CoUninitialize();
 		FreeLibrary(init.mfReadWrite);
 		FreeLibrary(init.mfPlat);
-		CoUninitialize();
+		FreeLibrary(init.shlwapi);
 		return false;
 	}
 
@@ -445,6 +479,7 @@ void MFDecoder::quit()
 		CoUninitialize();
 		FreeLibrary(init.mfReadWrite); init.mfReadWrite = nullptr;
 		FreeLibrary(init.mfPlat); init.mfPlat = nullptr;
+		FreeLibrary(init.shlwapi); init.shlwapi = nullptr;
 		init.success = false;
 		MFDecoder::initData = nullptr;
 	}
