@@ -20,7 +20,7 @@ class MFDecoder: public Decoder
 {
 public:
 	MFDecoder(Data *data, int bufferSize);
-	~MFDecoder();
+	virtual ~MFDecoder();
 
 	static bool accepts(const std::string &ext);
 	static void quit();
