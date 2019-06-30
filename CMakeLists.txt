@@ -83,6 +83,12 @@ endif()
 option(LOVE_JIT "Use LuaJIT" TRUE)
 option(LOVE_MPG123 "Use mpg123" TRUE)
 
+if(WIN32)
+	option(LOVE_MEDIAFOUNDATION "Use MediaFoundation decoder (Win7+)" TRUE)
+else()
+	set(LOVE_MEDIAFOUNDATION FALSE)
+endif()
+
 if(LOVE_JIT)
 	if(APPLE)
 		message(FATAL_ERROR "JIT not supported yet on Mac. Please use -DLOVE_JIT=0.")
@@ -94,6 +100,10 @@ endif()
 
 if(NOT LOVE_MPG123)
 	add_definitions(-DLOVE_NOMPG123)
+endif()
+
+if(NOT LOVE_MEDIAFOUNDATION)
+	add_definitions(-DLOVE_NOMEDIAFOUNDATION)
 endif()
 
 message(STATUS "Target platform: ${LOVE_TARGET_PLATFORM}")
@@ -962,6 +972,14 @@ else()
 		${LOVE_SRC_MODULE_SOUND_LULLABY}
 		src/modules/sound/lullaby/MP3Decoder.cpp
 		src/modules/sound/lullaby/MP3Decoder.h
+	)
+endif()
+
+if(WIN32 AND LOVE_MEDIAFOUNDATION)
+	set(LOVE_SRC_MODULE_SOUND_LULLABY
+		${LOVE_SRC_MODULE_SOUND_LULLABY}
+		src/modules/sound/lullaby/MediaFoundationDecoder.cpp
+		src/modules/sound/lullaby/MediaFoundationDecoder.h
 	)
 endif()
 

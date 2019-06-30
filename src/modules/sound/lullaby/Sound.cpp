@@ -41,6 +41,10 @@
 #	include "CoreAudioDecoder.h"
 #endif
 
+#if defined(LOVE_WINDOWS) && !defined(LOVE_NOMEDIAFOUNDATION)
+#	include "MediaFoundationDecoder.h"
+#endif // defined(LOVE_WINDOWS) && !defined(LOVE_NOMEDIAFOUNDATION)
+
 struct DecoderImpl
 {
 	love::sound::Decoder *(*create)(love::filesystem::FileData *data, int bufferSize);
@@ -78,6 +82,9 @@ Sound::~Sound()
 #ifndef LOVE_NOMPG123
 	Mpg123Decoder::quit();
 #endif // LOVE_NOMPG123
+#if defined(LOVE_WINDOWS) && !defined(LOVE_NOMEDIAFOUNDATION)
+	MFDecoder::quit();
+#endif // defined(LOVE_WINDOWS) && !defined(LOVE_NOMEDIAFOUNDATION)
 }
 
 const char *Sound::getName() const
@@ -108,6 +115,9 @@ sound::Decoder *Sound::newDecoder(love::filesystem::FileData *data, int bufferSi
 #endif
 		DecoderImplFor<WaveDecoder>(),
 		DecoderImplFor<FLACDecoder>(),
+#if defined(LOVE_WINDOWS) && !defined(LOVE_NOMEDIAFOUNDATION)
+		DecoderImplFor<MFDecoder>(),
+#endif
 		// DecoderImplFor<OtherDecoder>(),
 	};
 
