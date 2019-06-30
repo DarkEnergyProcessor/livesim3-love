@@ -53,6 +53,7 @@ typedef decltype(MFShutdown) ShutdownFunc;
 
 struct MFInitData
 {
+	bool success;
 	HMODULE mfPlat, mfReadWrite;
 
 	// mfplat.dll
@@ -110,14 +111,14 @@ MFDecoder::MFDecoder(Data *data, int bufferSize)
 
 		// Create SourceReader
 		IMFAttributes *attrs = nullptr;
-		HRESULT hr = S_OK;
 		if (SUCCEEDED(mfData.mfByteStream->QueryInterface(MFID::MFAttributes, (void**)& attrs)))
 		{
+			HRESULT hr = S_OK;
 			// Okay unfortunately we don't have any extension information
 			// so we try all possible combination of mimes.
 			static const std::wstring supported[] =
 			{
-				L"audio/x-ms-wma", L"audio/mpeg", L"audio/mp4", L"audio/wav", L""
+				L"audio/x-ms-wma", L"audio/mpeg", L"audio/mp4", L"audio/wav", L"audio/aac", L""
 			};
 
 			for (int i = 0; !(supported[i].empty()); i++)
@@ -130,14 +131,15 @@ MFDecoder::MFDecoder(Data *data, int bufferSize)
 			}
 
 			if (FAILED(hr))
-				throw love::Exception("Cannot create IMFSourceReader.");
+			{
+				if (hr == HRESULT_FROM_WIN32(ERROR_MORE_DATA))
+					throw love::Exception("Cannot create MediaFoundation audio decoder.");
+				else
+					throw love::Exception("Cannot create IMFSourceReader: HRESULT 0x%08X", (int) hr);
+			}
 		}
 		else
-		{
-			hr = init.createSourceReader(mfData.mfByteStream, nullptr, &mfData.mfSourceReader);
-			if (FAILED(hr))
-				throw love::Exception("Cannot create IMFSourceReader.");
-		}
+			throw love::Exception("Cannot create IMFSourceReader (no IMFAttributes in IMFByteStream).");
 
 		// Only select first audio stream
 		if (FAILED(mfData.mfSourceReader->SetStreamSelection(MF_SOURCE_READER_ALL_STREAMS, FALSE)))
@@ -213,7 +215,7 @@ bool MFDecoder::accepts(const std::string& ext)
 	// https://docs.microsoft.com/en-us/windows/desktop/medfound/supported-media-formats-in-media-foundation
 	static const std::string supported[] =
 	{
-		"wma", "mp3", "m4a", "wav", ""
+		"wma", "mp3", "m4a", "wav", "aac", ""
 	};
 
 	for (int i = 0; !(supported[i].empty()); i++)
@@ -365,10 +367,13 @@ double MFDecoder::getDuration()
 
 bool MFDecoder::initialize()
 {
-	static MFInitData init;
+	static MFInitData init = {false};
 
 	if (MFDecoder::initData != nullptr)
-		return true;
+		return init.success;
+
+	MFDecoder::initData = &init;
+	init.success = false;
 
 	if ((init.mfPlat = LoadLibraryA("mfplat.dll")) == nullptr)
 		return false;
@@ -427,7 +432,7 @@ bool MFDecoder::initialize()
 		return false;
 	}
 
-	MFDecoder::initData = &init;
+	init.success = true;
 	return true;
 }
 
@@ -440,6 +445,7 @@ void MFDecoder::quit()
 		CoUninitialize();
 		FreeLibrary(init.mfReadWrite); init.mfReadWrite = nullptr;
 		FreeLibrary(init.mfPlat); init.mfPlat = nullptr;
+		init.success = false;
 		MFDecoder::initData = nullptr;
 	}
 }
