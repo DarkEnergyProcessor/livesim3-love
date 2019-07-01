@@ -34,12 +34,15 @@ public:
 	double getDuration();
 
 private:
-	static bool initialize();
-	static void *initData;
+	struct MFInitData;
+	struct MFData;
 
-	// non-exposed API to prevent cluttering LOVE
+	static bool initialize();
+	static MFInitData *initData;
+
+	// non-exposed struct to prevent cluttering LOVE
 	// includes with Windows.h
-	void *mfData;
+	MFData *mfData;
 	// channel count
 	int channels;
 	// temporary buffer

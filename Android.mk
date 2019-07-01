@@ -1,6 +1,5 @@
 LOCAL_PATH:= $(call my-dir)
 
-# libogg
 include $(CLEAR_VARS)
 
 LOCAL_MODULE    := liblove
@@ -8,7 +7,7 @@ LOCAL_CFLAGS    := -fexceptions -g -Dlinux -Dunix \
 	-DHAVE_GCC_DESTRUCTOR=1 -DOPT_GENERIC -DREAL_IS_FLOAT \
 	-DGL_GLEXT_PROTOTYPES -DLOVE_TURBO_JPEG -DLOVE_NO_DEVIL \
 	-DAL_ALEXT_PROTOTYPES -DLS2X_USE_KISSFFT -Dkiss_fft_scalar=double \
-	-DLOVE_NO_MODPLUG=1
+	-DLOVE_NO_MODPLUG=1 -DLOVE_NOMPG123
 
 LOCAL_CPPFLAGS  := ${LOCAL_CFLAGS} 
 
@@ -115,8 +114,7 @@ LOCAL_SRC_FILES := \
 LOCAL_SRC_FILES += src/ls2x/src/main.cpp src/ls2x/src/audiomix.cpp src/ls2x/src/fft.cpp src/ls2x/src/kissfft/kiss_fft.c
 LOCAL_CXXFLAGS := -std=c++11
 
-LOCAL_SHARED_LIBRARIES := libopenal libmpg123 
-
+LOCAL_SHARED_LIBRARIES := libopenal
 LOCAL_STATIC_LIBRARIES := libvorbis libogg libtheora libfreetype libluajit SDL2_static
 
 # $(info liblove: include dirs $(LOCAL_C_INCLUDES))

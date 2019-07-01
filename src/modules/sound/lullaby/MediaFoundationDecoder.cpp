@@ -52,7 +52,16 @@ typedef decltype(MFCreateSourceReaderFromByteStream) CreateSourceReaderFunc;
 typedef decltype(MFStartup) StartupFunc;
 typedef decltype(MFShutdown) ShutdownFunc;
 
-struct MFInitData
+}
+
+namespace love
+{
+namespace sound
+{
+namespace lullaby
+{
+
+struct MFDecoder::MFInitData
 {
 	bool success;
 	HMODULE shlwapi, mfPlat, mfReadWrite;
@@ -68,7 +77,7 @@ struct MFInitData
 	CreateSourceReaderFunc *createSourceReader;
 };
 
-struct MFData
+struct MFDecoder::MFData
 {
 	IStream *memoryStream;
 	IMFByteStream *mfByteStream;
@@ -76,16 +85,7 @@ struct MFData
 	IMFMediaType *mfPCMAudio;
 };
 
-}
-
-namespace love
-{
-namespace sound
-{
-namespace lullaby
-{
-
-void *MFDecoder::initData = nullptr;
+MFDecoder::MFInitData *MFDecoder::initData = nullptr;
 
 MFDecoder::MFDecoder(Data *data, int bufferSize)
 : Decoder(data, bufferSize)
@@ -98,7 +98,7 @@ MFDecoder::MFDecoder(Data *data, int bufferSize)
 	MFData mfData = {
 		nullptr, nullptr, nullptr, nullptr
 	};
-	MFInitData &init = *((MFInitData *) MFDecoder::initData);
+	MFInitData &init = *MFDecoder::initData;
 	IMFMediaType *partialType = nullptr;
 
 	try
@@ -201,7 +201,6 @@ MFDecoder::MFDecoder(Data *data, int bufferSize)
 
 MFDecoder::~MFDecoder()
 {
-	MFData *mfData = (MFData *) this->mfData;
 	if (mfData->mfPCMAudio) mfData->mfPCMAudio->Release();
 	if (mfData->mfSourceReader) mfData->mfSourceReader->Release();
 	if (mfData->mfByteStream) mfData->mfByteStream->Release();
@@ -232,7 +231,6 @@ bool MFDecoder::accepts(const std::string& ext)
 
 int MFDecoder::decode()
 {
-	MFData &mfData = *((MFData *) this->mfData);
 	// both maxRead and decoded is in PCM frames
 	int pcmFrameSize = byteDepth * channels;
 	int maxRead = bufferSize / pcmFrameSize;
@@ -265,7 +263,7 @@ int MFDecoder::decode()
 		BYTE *rawBuf = nullptr;
 
 		// Read sample
-		hr = mfData.mfSourceReader->ReadSample(MF_SOURCE_READER_FIRST_AUDIO_STREAM, 0, nullptr, &flags, nullptr, &sample);
+		hr = mfData->mfSourceReader->ReadSample(MF_SOURCE_READER_FIRST_AUDIO_STREAM, 0, nullptr, &flags, nullptr, &sample);
 
 		if (FAILED(hr))
 			break;
@@ -321,11 +319,10 @@ Decoder* MFDecoder::clone()
 
 bool MFDecoder::seek(double s)
 {
-	MFData &mfData = *((MFData *) this->mfData);
 	PROPVARIANT seekDest;
 	InitPropVariantFromInt64(s * 1e7, &seekDest);
 
-	bool result = SUCCEEDED(mfData.mfSourceReader->SetCurrentPosition(GUID_NULL, seekDest));
+	bool result = SUCCEEDED(mfData->mfSourceReader->SetCurrentPosition(GUID_NULL, seekDest));
 	if (result)
 		eof = false;
 
@@ -356,10 +353,9 @@ double MFDecoder::getDuration()
 {
 	if (duration == -2.0)
 	{
-		MFData &mfData = *((MFData *) this->mfData);
 		PROPVARIANT prop;
 
-		if (SUCCEEDED(mfData.mfSourceReader->GetPresentationAttribute(MF_SOURCE_READER_MEDIASOURCE, MF_PD_DURATION, &prop)))
+		if (SUCCEEDED(mfData->mfSourceReader->GetPresentationAttribute(MF_SOURCE_READER_MEDIASOURCE, MF_PD_DURATION, &prop)))
 			duration = (double) prop.uhVal.QuadPart * 1e-7;
 		else
 			duration = -1.0;
@@ -474,7 +470,7 @@ void MFDecoder::quit()
 {
 	if (MFDecoder::initData)
 	{
-		MFInitData &init = *(MFInitData *) MFDecoder::initData;
+		MFInitData &init = *MFDecoder::initData;
 		init.shutdown();
 		CoUninitialize();
 		FreeLibrary(init.mfReadWrite); init.mfReadWrite = nullptr;
