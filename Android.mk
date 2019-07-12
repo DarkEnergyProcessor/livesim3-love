@@ -1,5 +1,4 @@
 LOCAL_PATH:= $(call my-dir)
-
 include $(CLEAR_VARS)
 
 LOCAL_MODULE    := liblove
@@ -14,27 +13,18 @@ LOCAL_CPPFLAGS  := ${LOCAL_CFLAGS}
 # I don't think there's armeabi-v7a device without NEON instructions in 2018
 LOCAL_ARM_NEON := true
 
-ifeq ($(TARGET_ARCH_ABI),arm64-v8a)
-	# ARM64 does have socklen_t
+ifeq ($(IS_ANDROID_21),yes)
+	# API21 defines socklen_t
 	LOCAL_CFLAGS += -DHAS_SOCKLEN_T=1
 endif
 
 LOCAL_C_INCLUDES  :=  \
 	${LOCAL_PATH}/src \
-	${LOCAL_PATH}/src/ls2x/include \
 	${LOCAL_PATH}/src/modules \
 	${LOCAL_PATH}/src/libraries/ \
 	${LOCAL_PATH}/src/libraries/enet/libenet/include \
 	${LOCAL_PATH}/src/libraries/physfs \
-	${LOCAL_PATH}/src/libraries/glslang/glslang/Include \
-	${LOCAL_PATH}/${SDL_PATH}/include \
-	${LOCAL_PATH}/${OPENAL_INCLUDE_PATH} \
-	${LOCAL_PATH}/${FT2_INCLUDE_PATH} \
-	${LOCAL_PATH}/${MPG123_INCLUDE_PATH} \
-	${LOCAL_PATH}/${VORBIS_INCLUDE_PATH} \
-	${LOCAL_PATH}/${LUA_INCLUDE_PATH} \
-	${LOCAL_PATH}/${OGG_INCLUDE_PATH} \
-	${LOCAL_PATH}/${THEORA_INCLUDE_PATH}
+	${LOCAL_PATH}/src/libraries/glslang/glslang/Include
 		
 LOCAL_SRC_FILES := \
 	$(filter-out \
@@ -110,10 +100,9 @@ LOCAL_SRC_FILES := \
 	$(wildcard ${LOCAL_PATH}/src/libraries/Wuff/*.c) \
   $(wildcard ${LOCAL_PATH}/src/libraries/xxHash/*.c) \
   ))
-
 LOCAL_SRC_FILES += src/ls2x/src/main.cpp src/ls2x/src/audiomix.cpp src/ls2x/src/fft.cpp src/ls2x/src/kissfft/kiss_fft.c
-LOCAL_CXXFLAGS := -std=c++11
 
+LOCAL_CXXFLAGS := -std=c++11
 LOCAL_SHARED_LIBRARIES := libopenal
 LOCAL_STATIC_LIBRARIES := libvorbis libogg libtheora libfreetype libluajit SDL2_static
 
