@@ -24,7 +24,8 @@ LOCAL_C_INCLUDES  :=  \
 	${LOCAL_PATH}/src/libraries/ \
 	${LOCAL_PATH}/src/libraries/enet/libenet/include \
 	${LOCAL_PATH}/src/libraries/physfs \
-	${LOCAL_PATH}/src/libraries/glslang/glslang/Include
+	${LOCAL_PATH}/src/libraries/glslang/glslang/Include \
+	${LOCAL_PATH}/src/ls2x/include
 		
 LOCAL_SRC_FILES := \
 	$(filter-out \
