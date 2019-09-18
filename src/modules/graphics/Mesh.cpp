@@ -34,7 +34,7 @@ namespace love
 namespace graphics
 {
 
-static const char *getBuiltinAttribName(VertexAttribID attribid)
+static const char *getBuiltinAttribName(BuiltinVertexAttribute attribid)
 {
 	const char *name = "";
 	vertex::getConstant(attribid, name);
@@ -588,7 +588,7 @@ void Mesh::drawInstanced(Graphics *gfx, const Matrix4 &m, int instancecount)
 		Shader::current->checkMainTexture(texture);
 
 	vertex::Attributes attributes;
-	vertex::Buffers buffers;
+	vertex::BufferBindings buffers;
 
 	int activebuffers = 0;
 
@@ -602,7 +602,7 @@ void Mesh::drawInstanced(Graphics *gfx, const Matrix4 &m, int instancecount)
 
 		// If the attribute is one of the LOVE-defined ones, use the constant
 		// attribute index for it, otherwise query the index from the shader.
-		VertexAttribID builtinattrib;
+		BuiltinVertexAttribute builtinattrib;
 		if (vertex::getConstant(attrib.first.c_str(), builtinattrib))
 			attributeindex = (int) builtinattrib;
 		else if (Shader::current)
@@ -619,7 +619,8 @@ void Mesh::drawInstanced(Graphics *gfx, const Matrix4 &m, int instancecount)
 			uint16 offset = (uint16) mesh->getAttributeOffset(attrib.second.index);
 			uint16 stride = (uint16) mesh->getVertexStride();
 
-			attributes.set(attributeindex, format.type, format.components, offset, stride, activebuffers, attrib.second.step);
+			attributes.set(attributeindex, format.type, (uint8) format.components, offset, activebuffers);
+			attributes.setBufferLayout(activebuffers, stride, attrib.second.step);
 
 			// TODO: Ideally we want to reuse buffers with the same stride+step.
 			buffers.set(activebuffers, mesh->vertexBuffer, 0);
