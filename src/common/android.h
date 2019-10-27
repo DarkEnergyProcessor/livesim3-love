@@ -76,6 +76,12 @@ bool createStorageDirectories();
 
 bool hasBackgroundMusic();
 
+bool hasRecordingPermission();
+
+void requestRecordingPermission();
+
+void showRecordingPermissionMissingDialog();
+
 } // android
 } // love
 

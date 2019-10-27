@@ -189,11 +189,7 @@ void OpenGL::setupContext()
 	glGetIntegerv(GL_MAX_VERTEX_ATTRIBS, &maxvertexattribs);
 
 	state.enabledAttribArrays = (uint32) ((1ull << uint32(maxvertexattribs)) - 1);
-
-	if (GLAD_ES_VERSION_3_0 || isCoreProfile())
-		state.instancedAttribArrays = state.enabledAttribArrays;
-	else
-		state.instancedAttribArrays = 0;
+	state.instancedAttribArrays = 0;
 
 	setVertexAttributes(vertex::Attributes(), vertex::BufferBindings());
 
@@ -727,7 +723,7 @@ void OpenGL::setVertexAttributes(const vertex::Attributes &attributes, const ver
 			uint32 divisorbit = divisor << i;
 			instanceattribbits |= divisorbit;
 
-			if ((state.enabledAttribArrays & bit) ^ divisorbit)
+			if ((state.instancedAttribArrays & bit) ^ divisorbit)
 				glVertexAttribDivisor(i, divisor);
 
 			GLboolean normalized = GL_FALSE;
