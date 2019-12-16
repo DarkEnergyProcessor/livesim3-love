@@ -12,6 +12,7 @@ addons:
     - cmake
     - libluajit-5.1-dev
     - libfreetype6-dev
+    - libpulse-dev
     - libsdl2-dev
     - libopenal-dev
     - libmodplug-dev
