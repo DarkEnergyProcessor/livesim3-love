@@ -2,9 +2,9 @@ LOCAL_PATH:= $(call my-dir)
 include $(CLEAR_VARS)
 
 LOCAL_MODULE    := liblove
-LOCAL_CFLAGS    := -g -DGL_GLEXT_PROTOTYPES -DAL_ALEXT_PROTOTYPES
-	-DGL_GLEXT_PROTOTYPES -DLOVE_NO_MODPLUG=1 -DLOVE_NOMPG123 \
-	-DAL_ALEXT_PROTOTYPES -DLS2X_USE_KISSFFT -Dkiss_fft_scalar=double
+LOCAL_CFLAGS    := -g -DGL_GLEXT_PROTOTYPES -DAL_ALEXT_PROTOTYPES \
+	-DLS2X_USE_KISSFFT -Dkiss_fft_scalar=double -DLS2X_EMBEDDED_IN_LOVE \
+	-DLOVE_NO_MODPLUG=1 -DLOVE_NOMPG123=1
 
 LOCAL_CPPFLAGS  := ${LOCAL_CFLAGS} 
 
@@ -24,7 +24,7 @@ LOCAL_C_INCLUDES  :=  \
 	${LOCAL_PATH}/src/libraries/physfs \
 	${LOCAL_PATH}/src/libraries/glslang/glslang/Include \
 	${LOCAL_PATH}/src/ls2x/include
-
+		
 LOCAL_SRC_FILES := \
 	$(filter-out \
 	  src/modules/graphics/opengl/GLee.* \
@@ -99,7 +99,6 @@ LOCAL_SRC_FILES := \
 	$(wildcard ${LOCAL_PATH}/src/libraries/Wuff/*.c) \
   $(wildcard ${LOCAL_PATH}/src/libraries/xxHash/*.c) \
   ))
-
 LOCAL_SRC_FILES += src/ls2x/src/main.cpp src/ls2x/src/audiomix.cpp src/ls2x/src/fft.cpp src/ls2x/src/kissfft/kiss_fft.c
 
 LOCAL_CXXFLAGS := -std=c++11
