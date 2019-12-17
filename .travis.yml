@@ -1,5 +1,6 @@
 language: c++
 dist: xenial
+sudo: required
 
 compiler:
   - gcc
@@ -20,6 +21,9 @@ addons:
     - libogg-dev
     - libvorbis-dev
     - libtheora-dev
+
+before_install:
+- sudo apt-get update –-fix-missing # Travis support tells me to add this.
 
 script:
   - cmake -Bbuild -H.
