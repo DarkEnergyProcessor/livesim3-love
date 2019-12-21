@@ -32,7 +32,7 @@ jobs:
         CXX: ${{ matrix.cxx }}
       run: cmake -Bbuild -H. -DCMAKE_INSTALL_PREFIX=$PWD/installdir -DCMAKE_BUILD_TYPE=Release
     - name: Build
-      run: cmake --build build --target install -j2
+      run: cmake --build build --target install # -j2 is not possible, CMake too old.
   build-windows:
     runs-on: windows-latest
     steps:
