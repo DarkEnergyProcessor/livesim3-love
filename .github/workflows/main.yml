@@ -1,0 +1,68 @@
+name: livesim3-love
+on: [push]
+
+jobs:
+  build-ubuntu:
+    runs-on: ubuntu-latest
+    strategy:
+      matrix:
+        cc: [gcc, clang]
+        cxx: [g++, clang++]
+        exclude:
+        - cc: gcc
+          cxx: clang++
+        - cc: clang
+          cxx: g++
+    steps:
+    - name: Checkout
+      uses: actions/checkout@v2
+    - name: Update Submodule
+      run: |
+        git submodule sync --recursive
+        git submodule update --init --force --recursive --depth=1
+    - name: Install Dependencies
+      run: |
+        sudo apt-get update
+        sudo apt-get install --assume-yes libluajit-5.1-dev zlib1g-dev libfreetype6-dev libsdl2-dev \
+            libopenal-dev libmodplug-dev libmpg123-dev libogg-dev libvorbis-dev libtheora-dev \
+            libavcodec-dev libavformat-dev libavutil-dev libswresample-dev libswscale-dev
+    - name: Configure
+      env:
+        CC: ${{ matrix.cc }}
+        CXX: ${{ matrix.cxx }}
+      run: cmake -Bbuild -H. -DCMAKE_INSTALL_PREFIX=$PWD/installdir -DCMAKE_BUILD_TYPE=Release
+    - name: Build
+      run: cmake --build build --target install -j2
+  build-windows:
+    runs-on: windows-latest
+    steps:
+    - name: Clone Megasource
+      run: hg clone https://bitbucket.org/rude/megasource
+    - name: Checkout
+      uses: actions/checkout@v2
+      with:
+        path: megasource/libs/love
+    - name: Update Submodule
+      shell: cmd
+      run: |
+        cd megasource\libs\love
+        git submodule sync --recursive
+        git submodule update --init --force --recursive --depth=1
+    - name: Download FFmpeg Development Libraries
+      shell: powershell
+      run: |
+        wget -Uri https://ffmpeg.zeranoe.com/builds/win64/dev/ffmpeg-4.0-win64-dev.zip -OutFile ffmpeg-dev.zip
+        7z x ffmpeg-dev.zip
+    - name: Configure
+      shell: cmd
+      run: |
+        cmake -Bbuild -Hmegasource -T v141 -A x64 -DLS2X_LIBAV_INCLUDE_DIR=%CD%\ffmpeg-4.0-win64-dev\include ^
+        -DCMAKE_INSTALL_PREFIX=%CD%\installdir
+    - name: Build
+      shell: cmd
+      run: cmake --build build --config Release --target install -j2
+    - name: Artifact
+      uses: actions/upload-artifact@v1
+      with:
+        name: livesim3-love
+        path: installdir
