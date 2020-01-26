@@ -293,9 +293,6 @@ bool TheoraVideoStream::swapBuffers()
 	if (demuxer.isEos())
 		return false;
 
-	if (!frameSync->isPlaying())
-		return false;
-
 	love::thread::Lock l(bufferMutex);
 	if (!frameReady)
 		return false;
