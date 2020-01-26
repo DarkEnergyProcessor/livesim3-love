@@ -24,6 +24,10 @@ jobs:
                                           libavcodec-dev libavformat-dev libavutil-dev libswresample-dev libswscale-dev
     - name: Checkout
       uses: actions/checkout@v2
+    - name: Update Submodule
+      run: |
+        git submodule sync --recursive
+        git submodule update --init --force --recursive --depth=1
     - name: Configure
       env:
         CC: ${{ matrix.cc }}
