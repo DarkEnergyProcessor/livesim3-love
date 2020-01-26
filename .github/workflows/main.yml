@@ -1,8 +1,8 @@
 name: livesim3-love
-on: [push]
+on: [push, pull_request]
 
 jobs:
-  build-ubuntu:
+  linux-os:
     runs-on: ubuntu-latest
     strategy:
       matrix:
@@ -14,18 +14,16 @@ jobs:
         - cc: clang
           cxx: g++
     steps:
-    - name: Checkout
-      uses: actions/checkout@v2
-    - name: Update Submodule
-      run: |
-        git submodule sync --recursive
-        git submodule update --init --force --recursive --depth=1
+    - name: Update APT
+      run: sudo apt-get update
     - name: Install Dependencies
       run: |
-        sudo apt-get update
-        sudo apt-get install --assume-yes libluajit-5.1-dev zlib1g-dev libfreetype6-dev libsdl2-dev \
-            libopenal-dev libmodplug-dev libmpg123-dev libogg-dev libvorbis-dev libtheora-dev \
-            libavcodec-dev libavformat-dev libavutil-dev libswresample-dev libswscale-dev
+        sudo apt-get install --assume-yes build-essential autotools-dev automake libtool pkg-config \
+                                          libfreetype6-dev libluajit-5.1-dev libsdl2-dev libopenal-dev \
+                                          libogg-dev libvorbis-dev libmodplug-dev libmpg123-dev libtheora-dev \
+                                          libavcodec-dev libavformat-dev libavutil-dev libswresample-dev libswscale-dev
+    - name: Checkout
+      uses: actions/checkout@v2
     - name: Configure
       env:
         CC: ${{ matrix.cc }}
@@ -33,11 +31,15 @@ jobs:
       run: cmake -Bbuild -H. -DCMAKE_INSTALL_PREFIX=$PWD/installdir -DCMAKE_BUILD_TYPE=Release
     - name: Build
       run: cmake --build build --target install # -j2 is not possible, CMake too old.
-  build-windows:
+  windows-os:
     runs-on: windows-latest
     steps:
     - name: Clone Megasource
-      run: hg clone https://bitbucket.org/rude/megasource
+      uses: actions/checkout@v2
+      with:
+        path: megasource
+        repository: love2d/megasource
+        ref: master
     - name: Checkout
       uses: actions/checkout@v2
       with:

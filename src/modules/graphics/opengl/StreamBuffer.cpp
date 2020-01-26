@@ -1,5 +1,5 @@
 /**
- * Copyright (c) 2006-2019 LOVE Development Team
+ * Copyright (c) 2006-2020 LOVE Development Team
  *
  * This software is provided 'as-is', without any express or implied
  * warranty.  In no event will the authors be held liable for any damages
@@ -454,12 +454,9 @@ public:
 	{
 		if (vbo != 0)
 		{
-			// Make sure the GPU has completed work using the memory before
-			// freeing it. TODO: Do we need a full glFinish() or is this
-			// sufficient?
-			glFlush();
-			for (FenceSync &sync : syncs)
-				sync.cpuWait();
+			// Make sure the GPU has completed all work before freeing the
+			// memory. glFlush+sync.cpuWait doesn't seem to be enough.
+			glFinish();
 
 			gl.bindBuffer(mode, vbo);
 			gl.deleteBuffer(vbo);
