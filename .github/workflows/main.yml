@@ -62,7 +62,7 @@ jobs:
       env:
         TARGETFF: ${{ matrix.target }}
       run: |
-        wget -Uri https://ffmpeg.zeranoe.com/builds/win64/dev/ffmpeg-4.0-$ENV:TARGETFF-dev.zip -OutFile ffmpeg-dev.zip
+        wget -Uri https://ffmpeg.zeranoe.com/builds/$ENV:TARGETFF/dev/ffmpeg-4.0-$ENV:TARGETFF-dev.zip -OutFile ffmpeg-dev.zip
         7z x ffmpeg-dev.zip
     - name: Configure
       shell: cmd
