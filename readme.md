@@ -4,9 +4,7 @@ This is modified LOVE 11.x used by [Live Simulator: 2 v3.0](https://github.com/M
 
 For Android, check out [livesim3-love-android](https://github.com/MikuAuahDark/livesim3-love-android) repo instead.
 
-**********
-
-LÖVE is an *awesome* framework you can use to make 2D games in Lua. It's free, open-source, and works on Windows, Mac OS X, Linux, Android, and iOS.
+[![Build Status: Github CI](https://github.com/MikuAuahDark/livesim3-love/workflows/livesim3-love/badge.svg)](https://github.com/MikuAuahDark/livesim3-love/actions?query=workflow%3Alivesim3-love)
 
 Documentation
 -------------
@@ -64,7 +62,7 @@ For code contributions, pull requests and patches are welcome. Be sure to read t
 Builds
 ------
 
-Releases are found in the [releases][releases] section on github, and are linked on [the site][site],
+Releases are found in the [releases][releases] section on GitHub, and are linked on [the site][site],
 and there's a ppa for ubuntu, [ppa:bartbes/love-stable][stableppa].
 
 There are also unstable/nightly builds:
