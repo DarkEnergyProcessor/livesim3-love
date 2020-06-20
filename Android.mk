@@ -99,7 +99,12 @@ LOCAL_SRC_FILES := \
 	$(wildcard ${LOCAL_PATH}/src/libraries/Wuff/*.c) \
   $(wildcard ${LOCAL_PATH}/src/libraries/xxHash/*.c) \
   ))
-LOCAL_SRC_FILES += src/ls2x/src/main.cpp src/ls2x/src/audiomix.cpp src/ls2x/src/fft.cpp src/ls2x/src/kissfft/kiss_fft.c
+LOCAL_SRC_FILES += \
+	src/ls2x/src/main.cpp \
+	src/ls2x/src/audiomix.cpp \
+	src/ls2x/src/fft.cpp \
+	src/ls2x/src/kissfft/kiss_fft.c \
+	src/ls2x/src/kissfft/kiss_fftr.c
 
 LOCAL_CXXFLAGS := -std=c++11
 LOCAL_SHARED_LIBRARIES := libopenal
