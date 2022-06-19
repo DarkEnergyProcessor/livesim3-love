@@ -3,7 +3,7 @@ on: [push, pull_request]
 
 jobs:
   linux-os:
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-18.04
     strategy:
       matrix:
         cc: [gcc, clang]
@@ -23,60 +23,61 @@ jobs:
                                           libogg-dev libvorbis-dev libmodplug-dev libmpg123-dev libtheora-dev \
                                           libavcodec-dev libavformat-dev libavutil-dev libswresample-dev libswscale-dev
     - name: Checkout
-      uses: actions/checkout@v2
-    - name: Update Submodule
-      run: |
-        git submodule sync --recursive
-        git submodule update --init --force --recursive --depth=1
+      uses: actions/checkout@v3
+      with:
+        submodules: true
     - name: Configure
       env:
         CC: ${{ matrix.cc }}
         CXX: ${{ matrix.cxx }}
       run: cmake -Bbuild -H. -DCMAKE_INSTALL_PREFIX=$PWD/installdir -DCMAKE_BUILD_TYPE=Release
     - name: Build
-      run: cmake --build build --target install # -j2 is not possible, CMake too old.
+      run: cmake --build build --target install -j$(nproc)
+    # TODO: Artifacts
   windows-os:
-    runs-on: windows-2016
+    runs-on: windows-2019
     strategy:
       matrix:
         target: [win32, win64]
+    env:
+      FFMPEG_VERSION: "5.0.1"
     steps:
     - name: Clone Megasource
-      uses: actions/checkout@v2
+      uses: actions/checkout@v3
       with:
         path: megasource
         repository: love2d/megasource
-        ref: master
+        ref: main
     - name: Checkout
-      uses: actions/checkout@v2
+      uses: actions/checkout@v3
       with:
         path: megasource/libs/love
-    - name: Update Submodule
-      shell: cmd
-      run: |
-        cd megasource\libs\love
-        git submodule sync --recursive
-        git submodule update --init --force --recursive --depth=1
+        submodules: true
     - name: Download FFmpeg Development Libraries
-      shell: powershell
-      env:
-        TARGETFF: ${{ matrix.target }}
-      run: |
-        wget -Uri https://ffmpeg.zeranoe.com/builds/$ENV:TARGETFF/dev/ffmpeg-4.0-$ENV:TARGETFF-dev.zip -OutFile ffmpeg-dev.zip
-        7z x ffmpeg-dev.zip
+      shell: cmd
+      if: ${{ matrix.target == "win64" }}
+      run: curl -Lo ffmpeg-dev.7z https://github.com/GyanD/codexffmpeg/releases/download/%FFMPEG_VERSION%/ffmpeg-%FFMPEG_VERSION%-full_build-shared.7z
+    - name: Extract FFmpeg Development Libraries
+      shell: cmd
+      if: ${{ matrix.target == "win64" }}
+      run: 7z x ffmpeg-dev.7z
     - name: Configure
       shell: cmd
       env:
-        TARGETFF: ${{ matrix.target }}
+        WINDOWS_TARGET: ${{ matrix.target }}
       run: |
         set BUILD_TARGET=Win32
-        if %TARGETFF% == win64 set BUILD_TARGET=x64
-        cmake -Bbuild -Hmegasource -T v141 -A %BUILD_TARGET% -DLS2X_LIBAV_INCLUDE_DIR=%CD%\ffmpeg-4.0-%TARGETFF%-dev\include -DCMAKE_INSTALL_PREFIX=%CD%\installdir
+        set LS2X_LIBAV_FLAG= 
+        if %WINDOWS_TARGET% == win64 (
+            set BUILD_TARGET=x64
+            set LS2X_LIBAV_TARGET=-DLS2X_LIBAV_INCLUDE_DIR=%CD%\ffmpeg-%FFMPEG_VERSION%-full_build-shared\include
+        )
+        cmake -Bbuild -Smegasource -T v141 -A %BUILD_TARGET% %LS2X_LIBAV_TARGET% -DCMAKE_INSTALL_PREFIX=%CD%\installdir
     - name: Build
       shell: cmd
       run: cmake --build build --config Release --target install -j2
     - name: Artifact
-      uses: actions/upload-artifact@v1
+      uses: actions/upload-artifact@v3
       with:
         name: livesim3-love-${{ matrix.target }}
         path: installdir
