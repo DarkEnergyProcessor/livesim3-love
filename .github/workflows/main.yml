@@ -55,11 +55,11 @@ jobs:
         submodules: true
     - name: Download FFmpeg Development Libraries
       shell: cmd
-      if: ${{ matrix.target == "win64" }}
+      if: ${{ matrix.target == 'win64' }}
       run: curl -Lo ffmpeg-dev.7z https://github.com/GyanD/codexffmpeg/releases/download/%FFMPEG_VERSION%/ffmpeg-%FFMPEG_VERSION%-full_build-shared.7z
     - name: Extract FFmpeg Development Libraries
       shell: cmd
-      if: ${{ matrix.target == "win64" }}
+      if: ${{ matrix.target == 'win64' }}
       run: 7z x ffmpeg-dev.7z
     - name: Configure
       shell: cmd
