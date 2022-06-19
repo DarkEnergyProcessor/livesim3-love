@@ -1,5 +1,5 @@
 /**
- * Copyright (c) 2006-2020 LOVE Development Team
+ * Copyright (c) 2006-2022 LOVE Development Team
  *
  * This software is provided 'as-is', without any express or implied
  * warranty.  In no event will the authors be held liable for any damages
@@ -25,6 +25,10 @@
 
 #include <cstdlib>
 #include <iostream>
+
+#ifdef LOVE_IOS
+#include "common/ios.h"
+#endif
 
 namespace love
 {
@@ -96,11 +100,6 @@ Audio::Audio()
 	, poolThread(nullptr)
 	, distanceModel(DISTANCE_INVERSE_CLAMPED)
 {
-#if defined(LOVE_LINUX)
-	// Temporarly block signals, as the thread inherits this mask
-	love::thread::disableSignals();
-#endif
-
 	// Before opening new device, check if recording
 	// is requested.
 	if (getRequestRecordingPermission())
@@ -110,29 +109,32 @@ Audio::Audio()
 			requestRecordingPermission();
 	}
 
-	// Passing null for default device.
-	device = alcOpenDevice(nullptr);
+	{
+#if defined(LOVE_LINUX)
+		// Temporarly block signals, as the thread inherits this mask
+		love::thread::ScopedDisableSignals disableSignals;
+#endif
 
-	if (device == nullptr)
-		throw love::Exception("Could not open device.");
+		// Passing null for default device.
+		device = alcOpenDevice(nullptr);
+
+		if (device == nullptr)
+			throw love::Exception("Could not open device.");
 
 #ifdef ALC_EXT_EFX
-	ALint attribs[4] = { ALC_MAX_AUXILIARY_SENDS, MAX_SOURCE_EFFECTS, 0, 0 };
+		ALint attribs[4] = { ALC_MAX_AUXILIARY_SENDS, MAX_SOURCE_EFFECTS, 0, 0 };
 #else
-	ALint *attribs = nullptr;
+		ALint *attribs = nullptr;
 #endif
 
-	context = alcCreateContext(device, attribs);
+		context = alcCreateContext(device, attribs);
 
-	if (context == nullptr)
-		throw love::Exception("Could not create context.");
+		if (context == nullptr)
+			throw love::Exception("Could not create context.");
 
-	if (!alcMakeContextCurrent(context) || alcGetError(device) != ALC_NO_ERROR)
-		throw love::Exception("Could not make context current.");
-
-#if defined(LOVE_LINUX)
-	love::thread::reenableSignals();
-#endif
+		if (!alcMakeContextCurrent(context) || alcGetError(device) != ALC_NO_ERROR)
+			throw love::Exception("Could not make context current.");
+	}
 
 #ifdef ALC_EXT_EFX
 	initializeEFX();
@@ -189,10 +191,18 @@ Audio::Audio()
 
 	poolThread = new PoolThread(pool);
 	poolThread->start();
+	
+#ifdef LOVE_IOS
+	love::ios::initAudioSessionInterruptionHandler();
+#endif
+        
 }
 
 Audio::~Audio()
 {
+#ifdef LOVE_IOS
+	love::ios::destroyAudioSessionInterruptionHandler();
+#endif
 	poolThread->setFinish();
 	poolThread->wait();
 
@@ -291,6 +301,17 @@ void Audio::pause(const std::vector<love::audio::Source*> &sources)
 std::vector<love::audio::Source*> Audio::pause()
 {
 	return Source::pause(pool);
+}
+
+void Audio::pauseContext()
+{
+	alcMakeContextCurrent(nullptr);
+}
+
+void Audio::resumeContext()
+{
+	if (context && alcGetCurrentContext() != context)
+		alcMakeContextCurrent(context);
 }
 
 void Audio::setVolume(float volume)

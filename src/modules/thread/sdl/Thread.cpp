@@ -1,5 +1,5 @@
 /**
- * Copyright (c) 2006-2020 LOVE Development Team
+ * Copyright (c) 2006-2022 LOVE Development Team
  *
  * This software is provided 'as-is', without any express or implied
  * warranty.  In no event will the authors be held liable for any damages
@@ -44,7 +44,7 @@ bool Thread::start()
 {
 #if defined(LOVE_LINUX)
 	// Temporarly block signals, as the thread inherits this mask
-	love::thread::disableSignals();
+	love::thread::ScopedDisableSignals disableSignals;
 #endif
 
 	Lock l(mutex);
@@ -55,9 +55,6 @@ bool Thread::start()
 	thread = SDL_CreateThread(thread_runner, t->getThreadName(), this);
 	running = (thread != nullptr);
 
-#if defined(LOVE_LINUX)
-	love::thread::reenableSignals();
-#endif
 	return running;
 }
 

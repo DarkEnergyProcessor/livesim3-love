@@ -1,5 +1,5 @@
 /**
- * Copyright (c) 2006-2020 LOVE Development Team
+ * Copyright (c) 2006-2022 LOVE Development Team
  *
  * This software is provided 'as-is', without any express or implied
  * warranty.  In no event will the authors be held liable for any damages
@@ -177,7 +177,7 @@ void ParticleSystem::resetOffset()
 	else
 	{
 		Quad::Viewport v = quads[0]->getViewport();
-		offset = love::Vector2(v.x*0.5f, v.y*0.5f);
+		offset = love::Vector2(v.w*0.5f, v.h*0.5f);
 	}
 }
 
