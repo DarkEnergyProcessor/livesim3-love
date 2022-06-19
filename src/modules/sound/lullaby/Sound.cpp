@@ -42,6 +42,7 @@
 #endif
 
 #if defined(LOVE_WINDOWS) && !defined(LOVE_NOMEDIAFOUNDATION)
+#	define LOVE_MEDIAFOUNDATION
 #	include "MediaFoundationDecoder.h"
 #endif // defined(LOVE_WINDOWS) && !defined(LOVE_NOMEDIAFOUNDATION)
 
@@ -82,9 +83,9 @@ Sound::~Sound()
 #ifndef LOVE_NOMPG123
 	Mpg123Decoder::quit();
 #endif // LOVE_NOMPG123
-#if defined(LOVE_WINDOWS) && !defined(LOVE_NOMEDIAFOUNDATION)
+#ifdef LOVE_MEDIAFOUNDATION
 	MFDecoder::quit();
-#endif // defined(LOVE_WINDOWS) && !defined(LOVE_NOMEDIAFOUNDATION)
+#endif // LOVE_MEDIAFOUNDATION
 }
 
 const char *Sound::getName() const
@@ -115,7 +116,7 @@ sound::Decoder *Sound::newDecoder(love::filesystem::FileData *data, int bufferSi
 #endif
 		DecoderImplFor<WaveDecoder>(),
 		DecoderImplFor<FLACDecoder>(),
-#if defined(LOVE_WINDOWS) && !defined(LOVE_NOMEDIAFOUNDATION)
+#ifdef LOVE_MEDIAFOUNDATION
 		DecoderImplFor<MFDecoder>(),
 #endif
 		// DecoderImplFor<OtherDecoder>(),
