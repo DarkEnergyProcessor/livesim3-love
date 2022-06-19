@@ -72,7 +72,7 @@ jobs:
             set BUILD_TARGET=x64
             set LS2X_LIBAV_TARGET=-DLS2X_LIBAV_INCLUDE_DIR=%CD%\ffmpeg-%FFMPEG_VERSION%-full_build-shared\include
         )
-        cmake -Bbuild -Smegasource -T v141 -A %BUILD_TARGET% %LS2X_LIBAV_TARGET% -DCMAKE_INSTALL_PREFIX=%CD%\installdir
+        cmake -Bbuild -Smegasource -T v141 -A %BUILD_TARGET% %LS2X_LIBAV_TARGET% -DLOVE_MPG123=0 -DCMAKE_INSTALL_PREFIX=%CD%\installdir
     - name: Build
       shell: cmd
       run: cmake --build build --config Release --target install -j2
