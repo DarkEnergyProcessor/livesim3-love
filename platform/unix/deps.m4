@@ -4,9 +4,6 @@ AC_DEFUN([ACLOVE_DEP_FREETYPE2], [
 AC_DEFUN([ACLOVE_DEP_OPENAL], [
 	PKG_CHECK_MODULES([openal], [openal], [], [LOVE_MSG_ERROR([OpenAL])])])
 
-AC_DEFUN([ACLOVE_DEP_LIBMODPLUG], [
-	PKG_CHECK_MODULES([libmodplug], [libmodplug], [], [LOVE_MSG_ERROR([libmodplug])])])
-
 AC_DEFUN([ACLOVE_DEP_VORBISFILE], [
 	PKG_CHECK_MODULES([vorbisfile], [vorbisfile], [], [LOVE_MSG_ERROR([libvorbis and libvorbisfile])])])
 
@@ -77,3 +74,6 @@ AC_DEFUN([ACLOVE_DEP_LUA], [ dnl Requires with-lua and with-luaversion
 	AS_VAR_IF([aclove_lua_found], [no], [ACLOVE_DEP_LUA_FALLBACK], [])
 	AS_VAR_IF([aclove_luaheaders_found], [no],
 		[AC_MSG_WARN([Could not locate lua headers for ${with_lua}${with_luaversion} or ${with_lua}, you probably need to specify them with CPPFLAGS])], [])])
+
+AC_DEFUN([ACLS2_DEP_FFMPEG], [
+	AC_CHECK_HEADERS([libavcodec/avcodec.h libavformat/avformat.h libavutil/avutil.h libswscale/swscale.h libswresample/swresample.h], [], LOVE_MSG_ERROR([FFmpeg development libraries])])

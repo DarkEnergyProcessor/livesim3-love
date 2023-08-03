@@ -30,7 +30,7 @@ AC_DEFUN([LOVE_MSG_ERROR],
 ACLOVE_CPP11_TEST
 
 # Add -fvisibility=hidden and -fvisibility-inlines-hidden
-CFLAGS="-fvisibility=hidden $CFLAGS"
+CFLAGS="-fvisibility=hidden -DLOVE_NO_MODPLUG=1 -DLS2X_USE_LIBAV -DLS2X_USE_KISSFFT -DLS2X_EMBEDDED_IN_LOVE -Dkiss_fft_scalar=double $CFLAGS"
 CPPFLAGS="-fvisibility=hidden -fvisibility-inlines-hidden $CPPFLAGS"
 
 # Allow people on OSX to use autotools, they need their platform files
@@ -59,7 +59,6 @@ with_clean_luaversion=`printf ${with_luaversion} | sed 's/\.//g'`
 m4_include([configure-modules-pre.ac])
 
 # Other features that can be enabled/disabled
-AC_ARG_ENABLE([mpg123], AC_HELP_STRING([--disable-mpg123], [Disable mp3 support, for patent-free builds]), [], [enable_mpg123=yes])
 AC_ARG_ENABLE([gme], AC_HELP_STRING([--enable-gme], [Enable GME support, for more chiptuney goodness]), [], [enable_gme=no])
 
 # Dependencies we always use
@@ -68,19 +67,14 @@ ACLOVE_DEP_SDL2
 ACLOVE_DEP_LIBM
 ACLOVE_DEP_ZLIB
 ACLOVE_DEP_PTHREAD
+ACLS2_DEP_FFMPEG
 
 # Conditional dependencies
 AS_VAR_IF([enable_module_audio], [yes], [ACLOVE_DEP_OPENAL], [])
 AS_VAR_IF([enable_module_font], [yes], [ACLOVE_DEP_FREETYPE2], [])
-AS_VAR_IF([enable_module_sound], [yes], [
-	ACLOVE_DEP_LIBMODPLUG
-	ACLOVE_DEP_VORBISFILE
-], [enable_mpg123=no])
+AS_VAR_IF([enable_module_sound], [yes], [ACLOVE_DEP_VORBISFILE], [])
 AS_VAR_IF([enable_module_video], [yes], [ACLOVE_DEP_THEORA], [])
 AS_VAR_IF([enable_gme], [yes], [ACLOVE_DEP_GME], [])
-AS_VAR_IF([enable_mpg123], [no],
-	  AC_DEFINE([LOVE_NOMPG123], [], [Build without mpg123]),
-	  [ACLOVE_DEP_MPG123])
 
 # Add flags for optional libraries
 AC_ARG_ENABLE([library-enet], [  --disable-library-enet    Turn off library enet], [], [enable_library_enet=yes])
@@ -121,7 +115,6 @@ AS_VAR_IF([enable_exe], [no], [], #else
 	  AC_DEFINE([LOVE_BUILD_EXE], [], [Skip building launcher]))
 
 AM_CONDITIONAL([LOVE_BUILD_EXE], [test "x$enable_exe" != xno])
-AM_CONDITIONAL([LOVE_NOMPG123], [test "x$enable_mpg123" = xno])
 AM_CONDITIONAL([LOVE_TARGET_OSX], [test "x$enable_osx" != xno])
 
 # Automatic script file rebuilding
