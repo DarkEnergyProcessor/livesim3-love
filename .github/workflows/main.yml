@@ -4,6 +4,9 @@ on: [push, pull_request]
 jobs:
   linux-os:
     runs-on: ubuntu-20.04
+    strategy:
+      matrix:
+        ffmpeg: [n5.0, n6.0]
     steps:
     - name: Update APT
       run: sudo apt-get update
@@ -29,30 +32,35 @@ jobs:
       shell: python
       env:
         LOVE_BRANCH: ${{ github.sha }}
+        FFMPEG_BRANCH: ${{ matrix.ffmpeg }}
       run: |
         import os
         for i in range(250):
-            if os.system(f"make getdeps FFMPEG_BRANCH=n6.0 LOVE_BRANCH={os.environ['LOVE_BRANCH']}") == 0:
+            if os.system(f"make getdeps FFMPEG_BRANCH={os.environ['FFMPEG_BRANCH']} LOVE_BRANCH={os.environ['LOVE_BRANCH']}") == 0:
                 raise SystemExit(0)
         raise Exception("make getdeps failed")
     - name: Build AppImage
-      run: make FFMPEG_BRANCH=n6.0 LOVE_BRANCH=${{ github.sha }}
+      env:
+        LOVE_BRANCH: ${{ github.sha }}
+        FFMPEG_BRANCH: ${{ matrix.ffmpeg }}
+      run: make FFMPEG_BRANCH=$FFMPEG_BRANCH LOVE_BRANCH=$LOVE_BRANCH
     - name: Print LuaJIT branch
       run: git -C LuaJIT-v2.1 branch -v
     - name: Artifact
       uses: actions/upload-artifact@v3
       with:
         name: love-x86_64.AppImage
-        path: love-${{ github.sha }}.AppImage
+        path: love-${{ github.sha }}-ffmpeg-${{ matrix.ffmpeg }}.AppImage
     - name: Artifact Debug Symbols
       uses: actions/upload-artifact@v3
       with:
         name: love-x86_64-AppImage-debug
-        path: love-${{ github.sha }}.AppImage-debug.tar.gz
+        path: love-${{ github.sha }}-ffmpeg-${{ matrix.ffmpeg }}.AppImage-debug.tar.gz
   windows-os:
     runs-on: windows-latest
-    env:
-      FFMPEG_VERSION: "6.0"
+    strategy:
+      matrix:
+        ffmpeg: ["5.0.1", "6.0"]
     defaults:
       run:
         shell: cmd
@@ -69,10 +77,14 @@ jobs:
         path: megasource/libs/love
         submodules: true
     - name: Download FFmpeg Development Libraries
+      env:
+        FFMPEG_VERSION: ${{ matrix.ffmpeg }}
       run: curl -Lo ffmpeg-dev.7z https://github.com/GyanD/codexffmpeg/releases/download/%FFMPEG_VERSION%/ffmpeg-%FFMPEG_VERSION%-full_build-shared.7z
     - name: Extract FFmpeg Development Libraries
       run: 7z x ffmpeg-dev.7z
     - name: Configure
+      env:
+        FFMPEG_VERSION: ${{ matrix.ffmpeg }}
       run: |
         set BUILD_TARGET=x64
         set LS2X_LIBAV_TARGET=-DLS2X_LIBAV_INCLUDE_DIR=%CD%\ffmpeg-%FFMPEG_VERSION%-full_build-shared\include
@@ -83,7 +95,7 @@ jobs:
     - name: Artifact
       uses: actions/upload-artifact@v3
       with:
-        name: love-windows
+        name: love-windows-ffmpeg-${{ matrix.ffmpeg }}
         path: install
     - name: Artifact JIT Modules
       uses: actions/upload-artifact@v3
