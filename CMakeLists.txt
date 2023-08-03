@@ -78,7 +78,7 @@ if(APPLE)
 endif()
 
 if(MSVC)
-	set(LOVE_CONSOLE_EXE_NAME lovec)
+	set(LOVE_CONSOLE_EXE_NAME lovec_${LOVE_VERSION_STR})
 endif()
 
 if(CMAKE_SIZEOF_VOID_P EQUAL 8)
@@ -1838,12 +1838,6 @@ endif()
 
 add_library(${LOVE_LIB_NAME} SHARED ${LOVE_LIB_SRC} ${LOVE_RC})
 set_target_properties(${LOVE_LIB_NAME} PROPERTIES C_VISIBILITY_PRESET hidden CXX_VISIBILITY_PRESET hidden VISIBILITY_INLINES_HIDDEN ON)
-if(LOVE_BUILD_EXE)
-	add_library(${LOVE_LIB_NAME} SHARED ${LOVE_LIB_SRC} ${LOVE_RC})
-else()
-	add_library(${LOVE_LIB_NAME} STATIC ${LOVE_LIB_SRC} ${LOVE_RC})
-endif()
-
 target_include_directories(${LOVE_LIB_NAME} PUBLIC
 	src
 	src/libraries
@@ -1866,11 +1860,12 @@ install(TARGETS ${LOVE_LIB_NAME} DESTINATION .)
 add_executable(${LOVE_EXE_NAME} WIN32 src/love.cpp ${LOVE_RC})
 target_link_libraries(${LOVE_EXE_NAME} ${LOVE_LIB_NAME})
 set_target_properties(${LOVE_EXE_NAME} PROPERTIES C_VISIBILITY_PRESET hidden CXX_VISIBILITY_PRESET hidden VISIBILITY_INLINES_HIDDEN ON)
+install(TARGETS ${LOVE_EXE_NAME} DESTINATION .)
 
-if(LOVE_BUILD_EXE)
-	add_executable(${LOVE_EXE_NAME} src/love.cpp ${LOVE_RC})
-	target_link_libraries(${LOVE_EXE_NAME} ${LOVE_LIB_NAME})
-	install(TARGETS ${LOVE_EXE_NAME} DESTINATION .)
+if(MSVC)
+	add_executable(${LOVE_CONSOLE_EXE_NAME} src/love.cpp ${LOVE_RC})
+	target_link_libraries(${LOVE_CONSOLE_EXE_NAME} ${LOVE_LIB_NAME})
+	install(TARGETS ${LOVE_CONSOLE_EXE_NAME} DESTINATION .)
 endif()
 
 function(post_step_move_dll ARG_POST_TARGET ARG_TARGET_OR_FILE)
