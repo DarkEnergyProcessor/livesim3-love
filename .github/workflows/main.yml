@@ -36,7 +36,7 @@ jobs:
                 raise SystemExit(0)
         raise Exception("make getdeps failed")
     - name: Build AppImage
-      run: make LOVE_BRANCH=${{ github.sha }}
+      run: make FFMPEG_BRANCH=n6.0 LOVE_BRANCH=${{ github.sha }}
     - name: Print LuaJIT branch
       run: git -C LuaJIT-v2.1 branch -v
     - name: Artifact
