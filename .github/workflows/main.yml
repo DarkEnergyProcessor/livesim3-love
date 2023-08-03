@@ -49,12 +49,12 @@ jobs:
         name: love-x86_64-AppImage-debug
         path: love-${{ github.sha }}.AppImage-debug.tar.gz
   windows-os:
-    runs-on: windows-2019
-    strategy:
-      matrix:
-        target: [win32, win64]
+    runs-on: windows-latest
     env:
       FFMPEG_VERSION: "5.0.1"
+    defaults:
+      run:
+        shell: cmd
     steps:
     - name: Clone Megasource
       uses: actions/checkout@v3
@@ -68,24 +68,13 @@ jobs:
         path: megasource/libs/love
         submodules: true
     - name: Download FFmpeg Development Libraries
-      shell: cmd
-      if: ${{ matrix.target == 'win64' }}
       run: curl -Lo ffmpeg-dev.7z https://github.com/GyanD/codexffmpeg/releases/download/%FFMPEG_VERSION%/ffmpeg-%FFMPEG_VERSION%-full_build-shared.7z
     - name: Extract FFmpeg Development Libraries
-      shell: cmd
-      if: ${{ matrix.target == 'win64' }}
       run: 7z x ffmpeg-dev.7z
     - name: Configure
-      shell: cmd
-      env:
-        WINDOWS_TARGET: ${{ matrix.target }}
       run: |
-        set BUILD_TARGET=Win32
-        set LS2X_LIBAV_FLAG= 
-        if %WINDOWS_TARGET% == win64 (
-            set BUILD_TARGET=x64
-            set LS2X_LIBAV_TARGET=-DLS2X_LIBAV_INCLUDE_DIR=%CD%\ffmpeg-%FFMPEG_VERSION%-full_build-shared\include
-        )
+        set BUILD_TARGET=x64
+        set LS2X_LIBAV_TARGET=-DLS2X_LIBAV_INCLUDE_DIR=%CD%\ffmpeg-%FFMPEG_VERSION%-full_build-shared\include
         cmake -Bbuild -Smegasource -T v141 -A %BUILD_TARGET% %LS2X_LIBAV_TARGET% -DLOVE_MPG123=0 -DCMAKE_INSTALL_PREFIX=%CD%\installdir
     - name: Build
       shell: cmd
@@ -93,12 +82,12 @@ jobs:
     - name: Artifact
       uses: actions/upload-artifact@v3
       with:
-        name: love-windows-${{ matrix.platform }}
+        name: love-windows
         path: install
     - name: Artifact JIT Modules
       uses: actions/upload-artifact@v3
       with:
-        name: love-windows-jitmodules-${{ matrix.platform }}
+        name: love-windows-jitmodules
         path: build/libs/LuaJIT/src/jit/*.lua
   # macOS:
   #   runs-on: macos-latest
