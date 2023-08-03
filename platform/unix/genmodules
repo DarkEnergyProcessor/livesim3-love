@@ -28,6 +28,7 @@ genmodules()
 
 	printf "liblove${love_amsuffix}_la_SOURCES = \\\\\n"
 	sourcefind "common" | sed "s/^/    /"
+	sourcefind "ls2x" | sed "s/^/    /"
 	FILES="$(sourcefind "scripts" | sed "s/^/    /")"
 	printf "${FILES:0:${#FILES}-2}\n\n"
 
