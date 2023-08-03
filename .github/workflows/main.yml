@@ -24,6 +24,7 @@ jobs:
       uses: actions/checkout@v3
       with:
         path: love2d-${{ github.sha }}
+        submodules: true
     - name: Get Dependencies for AppImage
       shell: python
       env:
