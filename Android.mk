@@ -2,11 +2,10 @@ LOCAL_PATH:= $(call my-dir)
 include $(CLEAR_VARS)
 
 LOCAL_MODULE    := liblove
-LOCAL_CFLAGS    := -g -DGL_GLEXT_PROTOTYPES -DAL_ALEXT_PROTOTYPES \
-	-DLS2X_USE_KISSFFT -Dkiss_fft_scalar=double -DLS2X_EMBEDDED_IN_LOVE \
-	-DLOVE_NO_MODPLUG=1 -DLOVE_NOMPG123=1
 
-LOCAL_CPPFLAGS  := ${LOCAL_CFLAGS} 
+LOCAL_CFLAGS    := -g -fvisibility=hidden -DGL_GLEXT_PROTOTYPES -DAL_ALEXT_PROTOTYPES -DLS2X_USE_KISSFFT \
+	-Dkiss_fft_scalar=double -DLS2X_EMBEDDED_IN_LOVE -DLOVE_NO_MODPLUG=1 -DLOVE_NOMPG123=1
+LOCAL_CPPFLAGS  := -fvisibility-inlines-hidden
 
 # I don't think there's armeabi-v7a device without NEON instructions in 2018
 LOCAL_ARM_NEON := true
