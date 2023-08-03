@@ -76,4 +76,4 @@ AC_DEFUN([ACLOVE_DEP_LUA], [ dnl Requires with-lua and with-luaversion
 		[AC_MSG_WARN([Could not locate lua headers for ${with_lua}${with_luaversion} or ${with_lua}, you probably need to specify them with CPPFLAGS])], [])])
 
 AC_DEFUN([ACLS2_DEP_FFMPEG], [
-	AC_CHECK_HEADERS([libavcodec/avcodec.h libavformat/avformat.h libavutil/avutil.h libswscale/swscale.h libswresample/swresample.h], [], LOVE_MSG_ERROR([FFmpeg development libraries])])
+	AC_CHECK_HEADERS([libavcodec/avcodec.h libavformat/avformat.h libavutil/avutil.h libswscale/swscale.h libswresample/swresample.h])], [], [LOVE_MSG_ERROR([FFmpeg development libraries])], [])

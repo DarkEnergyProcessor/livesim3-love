@@ -30,8 +30,15 @@ AC_DEFUN([LOVE_MSG_ERROR],
 ACLOVE_CPP11_TEST
 
 # Add -fvisibility=hidden and -fvisibility-inlines-hidden
-CFLAGS="-fvisibility=hidden -DLOVE_NO_MODPLUG=1 -DLS2X_USE_LIBAV -DLS2X_USE_KISSFFT -DLS2X_EMBEDDED_IN_LOVE -Dkiss_fft_scalar=double $CFLAGS"
+CFLAGS="-fvisibility=hidden -Dkiss_fft_scalar=double $CFLAGS"
 CPPFLAGS="-fvisibility=hidden -fvisibility-inlines-hidden $CPPFLAGS"
+
+# LS2 specific modifications.
+AC_DEFINE(LOVE_NO_MODPLUG, 1, [LOVE_NO_MODPLUG])
+AC_DEFINE(LOVE_NOMPG123, 1, [LOVE_NOMPG123])
+AC_DEFINE(LS2X_USE_KISSFFT, 1, [LS2X_USE_KISSFFT])
+AC_DEFINE(LS2X_USE_LIBAV, 1, [LS2X_USE_LIBAV])
+AC_DEFINE(LS2X_EMBEDDED_IN_LOVE, 1, [LS2X_EMBEDDED_IN_LOVE])
 
 # Allow people on OSX to use autotools, they need their platform files
 AC_ARG_ENABLE([osx],
