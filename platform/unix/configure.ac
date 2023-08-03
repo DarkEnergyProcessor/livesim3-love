@@ -31,7 +31,7 @@ ACLOVE_CPP11_TEST
 
 # Add -fvisibility=hidden and -fvisibility-inlines-hidden
 CFLAGS="-fvisibility=hidden -DLS2X_USE_KISSFFT -DLS2X_USE_LIBAV -DLS2X_EMBEDDED_IN_LOVE -Dkiss_fft_scalar=double $CFLAGS"
-CPPFLAGS="-fvisibility=hidden -fvisibility-inlines-hidden -DLS2X_USE_KISSFFT -DLS2X_USE_LIBAV -DLS2X_EMBEDDED_IN_LOVE -Dkiss_fft_scalar=double $CPPFLAGS"
+CXXFLAGS="-fvisibility=hidden -fvisibility-inlines-hidden -DLS2X_USE_KISSFFT -DLS2X_USE_LIBAV -DLS2X_EMBEDDED_IN_LOVE -Dkiss_fft_scalar=double $CXXFLAGS"
 
 # LS2 specific modifications.
 AC_DEFINE(LOVE_NO_MODPLUG, 1, [LOVE_NO_MODPLUG])
