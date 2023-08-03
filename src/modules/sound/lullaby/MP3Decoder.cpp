@@ -1,5 +1,7 @@
 // MP3 decoder using minimp3 instead of Mpg123
 
+#include "common/config.h"
+
 #ifdef LOVE_NOMPG123
 
 #define DR_MP3_IMPLEMENTATION

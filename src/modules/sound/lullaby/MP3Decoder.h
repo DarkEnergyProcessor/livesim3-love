@@ -1,7 +1,5 @@
 // MP3 decoder using minimp3 instead of Mpg123
 
-#ifdef LOVE_NOMPG123
-
 #ifndef LOVE_SOUND_LULLABY_MINIMP3_DECODER_H
 #define LOVE_SOUND_LULLABY_MINIMP3_DECODER_H
 
@@ -11,6 +9,8 @@
 // LOVE
 #include "common/Data.h"
 #include "sound/Decoder.h"
+
+#ifdef LOVE_NOMPG123
 
 #include "dr_mp3/dr_mp3.h"
 
@@ -47,5 +47,5 @@ private:
 }
 }
 
-#endif // LOVE_SOUND_LULLABY_MINIMP3_DECODER_H
 #endif // LOVE_NOMPG123
+#endif // LOVE_SOUND_LULLABY_MINIMP3_DECODER_H
