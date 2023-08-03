@@ -1,10 +1,10 @@
-This is modified LOVE 11.x used by [Live Simulator: 2 v3.0](https://github.com/MikuAuahDark/livesim2/tree/v3.0.5) and later.
+This is modified LOVE 11.x used by [Live Simulator: 2 v3.0](https://github.com/DarkEnergyProcessor/livesim2_async/tree/master) and later.
 
-[![Build Status](https://travis-ci.com/MikuAuahDark/livesim3-love.svg?branch=master)](https://travis-ci.com/MikuAuahDark/livesim3-love)
+For Android, check out [livesim3-love-android](https://github.com/DarkEnergyProcessor/livesim3-love-android) repo instead.
 
-For Android, check out [livesim3-love-android](https://github.com/MikuAuahDark/livesim3-love-android) repo instead.
+[![livesim3-love](https://github.com/DarkEnergyProcessor/livesim3-love/actions/workflows/main.yml/badge.svg)](https://github.com/DarkEnergyProcessor/livesim3-love/actions/workflows/main.yml)
 
-[![Build Status: Github CI](https://github.com/MikuAuahDark/livesim3-love/workflows/livesim3-love/badge.svg)](https://github.com/MikuAuahDark/livesim3-love/actions?query=workflow%3Alivesim3-love)
+*****
 
 Documentation
 -------------
