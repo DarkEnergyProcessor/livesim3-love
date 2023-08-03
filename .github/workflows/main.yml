@@ -32,7 +32,7 @@ jobs:
       run: |
         import os
         for i in range(250):
-            if os.system(f"make getdeps LOVE_BRANCH={os.environ['LOVE_BRANCH']}") == 0:
+            if os.system(f"make getdeps FFMPEG_BRANCH=n6.0 LOVE_BRANCH={os.environ['LOVE_BRANCH']}") == 0:
                 raise SystemExit(0)
         raise Exception("make getdeps failed")
     - name: Build AppImage
@@ -52,7 +52,7 @@ jobs:
   windows-os:
     runs-on: windows-latest
     env:
-      FFMPEG_VERSION: "5.0.1"
+      FFMPEG_VERSION: "6.0"
     defaults:
       run:
         shell: cmd
@@ -76,7 +76,7 @@ jobs:
       run: |
         set BUILD_TARGET=x64
         set LS2X_LIBAV_TARGET=-DLS2X_LIBAV_INCLUDE_DIR=%CD%\ffmpeg-%FFMPEG_VERSION%-full_build-shared\include
-        cmake -Bbuild -Smegasource -T v141 -A %BUILD_TARGET% %LS2X_LIBAV_TARGET% -DLOVE_MPG123=0 -DCMAKE_INSTALL_PREFIX=%CD%\installdir
+        cmake -Bbuild -Smegasource -T v143 -A %BUILD_TARGET% %LS2X_LIBAV_TARGET% -DLOVE_MPG123=0 -DCMAKE_INSTALL_PREFIX=%CD%\installdir
     - name: Build
       shell: cmd
       run: cmake --build build --config Release --target install -j2
