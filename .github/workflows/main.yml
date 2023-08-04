@@ -46,18 +46,61 @@ jobs:
       run: make FFMPEG_BRANCH=$FFMPEG_BRANCH LOVE_BRANCH=$LOVE_BRANCH
     - name: Print LuaJIT branch
       run: git -C LuaJIT-v2.1 branch -v
-    - name: Artifact
+    - name: Artifact AppImage
       uses: actions/upload-artifact@v3
       with:
-        name: love-x86_64.AppImage
-        path: love-${{ github.sha }}-ffmpeg-${{ matrix.ffmpeg }}.AppImage
+        name: love-x86_64-ffmpeg-${{ matrix.ffmpeg }}.AppImage
+        path: love-${{ github.sha }}.AppImage
+    - name: Artifact Tar
+      uses: actions/upload-artifact@v3
+      with:
+        name: love-x86_64-ffmpeg-${{ matrix.ffmpeg }}.tar.gz
+        path: love-${{ github.sha }}.tar.gz
     - name: Artifact Debug Symbols
       uses: actions/upload-artifact@v3
       with:
-        name: love-x86_64-AppImage-debug
-        path: love-${{ github.sha }}-ffmpeg-${{ matrix.ffmpeg }}.AppImage-debug.tar.gz
+        name: love-x86_64-ffmpeg-${{ matrix.ffmpeg }}-AppImage-debug
+        path: love-${{ github.sha }}.AppImage-debug.tar.gz
+  windows-https:
+    runs-on: windows-latest
+    defaults:
+      run:
+        shell: cmd
+    steps:
+    - name: Clone Megasource
+      uses: actions/checkout@v3
+      with:
+        path: megasource
+        repository: love2d/megasource
+        ref: main
+    - name: Clone lua-https
+      uses: actions/checkout@v3
+      with:
+        path: lua-https
+        repository: love2d/lua-https
+        ref: main
+    - name: Enable VSDevCmd.bat
+      uses: ilammy/msvc-dev-cmd@v1
+      with:
+        arch: x64
+    - name: Build LuaJIT
+      working-directory: megasource/libs/LuaJIT/src
+      run: msvcbuild.bat
+    - name: Configure lua-https
+      working-directory: lua-https
+      run: cmake -Bbuild -S. --install-prefix=%CD%\installdir -DLUAJIT_DIR=%CD%\..\megasource\libs\LuaJIT\src
+    - name: Build lua-https
+      working-directory: lua-https
+      run: cmake --build build --config Release --target install
+    - name: Artifact
+      uses: actions/upload-artifact@v3
+      with:
+        name: lua-https-windows
+        path: lua-https/installdir/https.dll
+        if-no-files-found: error
   windows-os:
     runs-on: windows-latest
+    needs: windows-https
     strategy:
       matrix:
         ffmpeg: ["5.0.1", "6.0"]
@@ -82,13 +125,18 @@ jobs:
       run: curl -Lo ffmpeg-dev.7z https://github.com/GyanD/codexffmpeg/releases/download/%FFMPEG_VERSION%/ffmpeg-%FFMPEG_VERSION%-full_build-shared.7z
     - name: Extract FFmpeg Development Libraries
       run: 7z x ffmpeg-dev.7z
+    - name: Download lua-https Artifact
+      uses: actions/download-artifact@v2
+      with:
+        name: lua-https-windows
+        path: installdir
     - name: Configure
       env:
         FFMPEG_VERSION: ${{ matrix.ffmpeg }}
       run: |
         set BUILD_TARGET=x64
         set LS2X_LIBAV_TARGET=-DLS2X_LIBAV_INCLUDE_DIR=%CD%\ffmpeg-%FFMPEG_VERSION%-full_build-shared\include
-        cmake -Bbuild -Smegasource -T v143 -A %BUILD_TARGET% %LS2X_LIBAV_TARGET% -DLOVE_MPG123=0 -DCMAKE_INSTALL_PREFIX=%CD%\installdir
+        cmake -Bbuild -Smegasource -T v143 -A %BUILD_TARGET% --install-prefix=%CD%\installdir %LS2X_LIBAV_TARGET% -DLOVE_MPG123=0
     - name: Build
       shell: cmd
       run: cmake --build build --config Release --target install -j2
@@ -96,7 +144,7 @@ jobs:
       uses: actions/upload-artifact@v3
       with:
         name: love-windows-ffmpeg-${{ matrix.ffmpeg }}
-        path: install
+        path: installdir
     - name: Artifact JIT Modules
       uses: actions/upload-artifact@v3
       with:
