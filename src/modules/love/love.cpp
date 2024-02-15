@@ -161,9 +161,8 @@ extern "C"
 #endif
 #if defined(LS2X_EMBEDDED_IN_LOVE)
 	extern int luaopen_ls2xlib(lua_State *L);
-#endif#ifdef LOVE_ENABLE_LUAHTTPS
-	extern int luaopen_https(lua_State*);
 #endif
+	extern int luaopen_https(lua_State*);
 	extern int luaopen_love_nogame(lua_State*);
 	extern int luaopen_love_jitsetup(lua_State*);
 	extern int luaopen_love_arg(lua_State*);
@@ -232,9 +231,7 @@ static const luaL_Reg modules[] = {
 #if defined(LS2X_EMBEDDED_IN_LOVE)
 	{ "ls2xlib", luaopen_ls2xlib },
 #endif
-#ifdef LOVE_ENABLE_LUAHTTPS
-	{ "https", luaopen_https };
-#endif
+	{ "https", luaopen_https },
 	{ "love.nogame", luaopen_love_nogame },
 	{ "love.jitsetup", luaopen_love_jitsetup },
 	{ "love.arg", luaopen_love_arg },
